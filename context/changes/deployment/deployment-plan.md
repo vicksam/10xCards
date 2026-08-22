@@ -24,7 +24,7 @@ Ship 10xCards to production on Cloudflare Workers with two deploy triggers: manu
 | Auto-deploy mechanism | Cloudflare Workers Builds (native git integration, dashboard setup) |
 | Environments | Production only |
 | Project name | `10x-cards` |
-| Custom domain | Not now — `10x-cards.<subdomain>.workers.dev` for MVP |
+| Custom domain | Not now — `10x-cards.vicksam.workers.dev` for MVP |
 | Preview deploy access | Public is acceptable |
 
 ---
@@ -180,7 +180,7 @@ Then retry `wrangler secret put`. The first deploy creates the Worker; secrets a
   npm run deploy
   # Which runs: npm run build && wrangler deploy
   ```
-- [ ] **3.2** Note the deployment URL from wrangler output (e.g., `https://10x-cards.<subdomain>.workers.dev`)
+- [ ] **3.2** Note the deployment URL from wrangler output (e.g., `https://10x-cards.vicksam.workers.dev`)
 - [ ] **3.3** Smoke test the deployed app:
   - [ ] Homepage loads (`/`)
   - [ ] Auth pages load (`/auth/signin`, `/auth/signup`)
@@ -211,7 +211,7 @@ Then retry `wrangler secret put`. The first deploy creates the Worker; secrets a
 
 Supabase rejects redirects to URLs not in its allow-list:
 1. **Supabase Dashboard → Authentication → URL Configuration**
-2. Add your Workers URL to **Site URL** or **Redirect URLs**: `https://10x-cards.<subdomain>.workers.dev`
+2. Add your Workers URL to **Site URL** or **Redirect URLs**: `https://10x-cards.vicksam.workers.dev`
 3. Local `supabase/config.toml` `site_url` is local-only — doesn't affect production.
 </details>
 
@@ -304,7 +304,7 @@ They are independent pipelines. Common scenario: GHA CI fails (lint error) but C
 
 - [ ] **5.1** Verify Supabase project exists and is on the Free tier (or appropriate plan)
 - [ ] **5.2** Configure redirect URLs in Supabase Dashboard:
-  - **Authentication → URL Configuration → Site URL**: Set to your production URL (`https://10x-cards.<subdomain>.workers.dev`)
+  - **Authentication → URL Configuration → Site URL**: Set to your production URL (`https://10x-cards.vicksam.workers.dev`)
   - **Redirect URLs**: Add your production URL
 - [ ] **5.3** Verify email confirmations setting: your local `config.toml` has `enable_confirmations = false` — check if your production Supabase project matches (Authentication → Settings → Email)
 - [ ] **5.4** Test the full auth flow on the production URL:
@@ -364,7 +364,7 @@ Write the deployment record to `context/deployment/deploy-plan.md`:
 project: 10x-cards
 deployed_at: <date-of-first-production-deploy>
 platform: Cloudflare Workers
-production_url: https://10x-cards.<subdomain>.workers.dev
+production_url: https://10x-cards.vicksam.workers.dev
 ---
 
 ## Deployment Summary
@@ -382,7 +382,7 @@ production_url: https://10x-cards.<subdomain>.workers.dev
 
 | Environment | URL | Deploy trigger |
 |---|---|---|
-| Production | `https://10x-cards.<subdomain>.workers.dev` | Manual + auto on push to `master` |
+| Production | `https://10x-cards.vicksam.workers.dev` | Manual + auto on push to `master` |
 
 ## Secrets Wired
 

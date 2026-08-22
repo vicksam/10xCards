@@ -1,0 +1,6 @@
+# Cloudflare local dev secrets (used by wrangler dev / astro dev)
+# Copy this file to .dev.vars and fill in your values.
+# .dev.vars is gitignored — never commit it.
+
+SUPABASE_URL=http://127.0.0.1:54321
+SUPABASE_KEY=your-local-supabase-anon-key
