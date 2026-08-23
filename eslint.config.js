@@ -15,7 +15,7 @@ const baseConfig = tseslint.config({
   extends: [eslint.configs.recommended, tseslint.configs.strictTypeChecked, tseslint.configs.stylisticTypeChecked],
   languageOptions: {
     parserOptions: {
-      projectService: true,
+      project: true,
       tsconfigRootDir: import.meta.dirname,
     },
   },
@@ -70,6 +70,10 @@ const astroConfig = tseslint.config({
 
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
+  {
+    // Generated files and Supabase local dev artifacts — never lint these
+    ignores: ["src/types/database.ts", "supabase/"],
+  },
   baseConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
