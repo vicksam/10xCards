@@ -29,7 +29,7 @@ Manual flashcard creation is slow and happens when energy is lowest — after a 
 
 | ID | Change ID | Outcome (user can …) | Prerequisites | PRD refs | Status |
 |---|---|---|---|---|---|
-| F-01 | flashcard-schema | (foundation) Supabase migration pipeline and flashcards table with RLS landed | — | Access Control | in-progress |
+| F-01 | flashcard-schema | (foundation) Supabase migration pipeline and flashcards table with RLS landed | — | Access Control | done |
 | S-01 | ai-card-generation | paste study text, trigger AI generation, review candidates (accept/edit/reject), and save accepted cards | F-01 | US-01, FR-001, FR-002, FR-003, FR-004 | proposed |
 | S-02 | spaced-repetition-session | start a spaced repetition study session with scheduling | F-01 | FR-007 | proposed |
 | S-03 | card-management | manually create a flashcard and view, edit, delete saved flashcards | F-01 | FR-005, FR-006 | proposed |
@@ -59,7 +59,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** If the base schema is wrong, every downstream slice needs migration fixes. Sequenced first to catch data-model issues early; scope is intentionally minimal (flashcard columns only — scheduling metadata is added by S-02 when needed).
-- **Status:** in-progress
+- **Status:** done
 
 ## Slices
 
