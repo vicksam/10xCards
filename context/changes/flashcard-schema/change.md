@@ -1,7 +1,7 @@
 ---
 change_id: flashcard-schema
 title: Set up Supabase migration pipeline and flashcards table with RLS
-status: implementing
+status: implemented
 created: 2026-08-23
 updated: 2026-08-23
 archived_at: null

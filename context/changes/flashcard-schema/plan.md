@@ -221,5 +221,5 @@ Steps:
 
 - [x] Phase 1 — Migration file (`supabase/migrations/20260823150404_flashcard_schema.sql` + `supabase/seed.sql`) — 768b794
 - [x] Phase 2 — TypeScript type generation (`src/types/database.ts`, `src/types.ts`) — 4d7dc58
-- [x] Phase 3 — Wire `Database` generic (`src/lib/supabase.ts`)
-- [ ] Phase 4 — End-to-end verification (reset, tsc, lint, build)
+- [x] Phase 3 — Wire `Database` generic (`src/lib/supabase.ts`) — d4e4116
+- [x] Phase 4 — End-to-end verification (reset, tsc, lint, build)
