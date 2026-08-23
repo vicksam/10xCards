@@ -123,4 +123,4 @@ _None — all product-level decisions were locked during shaping (PRD §Open Que
 
 ## Done
 
-(Empty on first generation. `/10x-archive` appends entries here when a change is archived.)
+- **F-01: (foundation) Supabase migration pipeline and flashcards table with RLS landed** — Archived 2026-08-23 → `context/archive/2026-08-23-flashcard-schema/`. Lesson: —.
