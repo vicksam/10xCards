@@ -1,0 +1,2 @@
+-- Seed file placeholder.
+-- Flashcard rows are user-owned and created via the app, not seeded.
