@@ -13,11 +13,24 @@ const { user } = Astro.locals;
       <p class="text-blue-100/80">
         Welcome, <span class="font-semibold text-white">{user?.email}</span>
       </p>
-      <p class="mt-2 text-sm text-blue-100/50">This page is only for authenticated users.</p>
+      <div class="mt-6 flex flex-col gap-3">
+        <a
+          href="/generate"
+          class="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-blue-600 hover:to-purple-700"
+        >
+          Generate flashcards
+        </a>
+        <a
+          href="/stats"
+          class="inline-flex items-center justify-center rounded-lg border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20"
+        >
+          View stats
+        </a>
+      </div>
       <form method="POST" action="/api/auth/signout" class="mt-6">
         <button
           type="submit"
-          class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20"
+          class="rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-xs text-white/70 transition-colors hover:bg-white/15 hover:text-white"
         >
           Sign out
         </button>

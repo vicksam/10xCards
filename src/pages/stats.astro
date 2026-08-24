@@ -1,0 +1,334 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { createClient } from "@/lib/supabase";
+import type { UserKpiStats } from "@/types";
+
+const { user } = Astro.locals;
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+
+// Fetch finalized generation reviews for current user
+const { data: reviewsData } =
+  user && supabase
+    ? await supabase
+        .from("generation_reviews")
+        .select("generated_count, accepted_count, edited_count, rejected_count, created_at, finalized_at")
+        .eq("user_id", user.id)
+        .not("finalized_at", "is", null)
+        .order("created_at", { ascending: true })
+    : { data: [] };
+
+// Fetch flashcards source values for current user
+const { data: flashcardsData } =
+  user && supabase ? await supabase.from("flashcards").select("source").eq("user_id", user.id) : { data: [] };
+
+const reviews = reviewsData ?? [];
+const flashcards = flashcardsData ?? [];
+
+// Calculate aggregates
+let totalGenerated = 0;
+let totalAccepted = 0;
+let totalEdited = 0;
+let totalRejected = 0;
+
+const dailyMap = new Map<string, { generated: number; acceptedEdited: number }>();
+
+for (const review of reviews) {
+  totalGenerated += review.generated_count;
+  totalAccepted += review.accepted_count;
+  totalEdited += review.edited_count;
+  totalRejected += review.rejected_count;
+
+  const dateKey = review.created_at.substring(0, 10);
+  const existing = dailyMap.get(dateKey) ?? { generated: 0, acceptedEdited: 0 };
+  existing.generated += review.generated_count;
+  existing.acceptedEdited += review.accepted_count + review.edited_count;
+  dailyMap.set(dateKey, existing);
+}
+
+const totalAiCards = flashcards.filter((c) => c.source === "ai").length;
+const totalSavedCards = flashcards.length;
+
+const acceptanceRate =
+  totalGenerated > 0 ? Math.round(((totalAccepted + totalEdited) / totalGenerated) * 1000) / 10 : null;
+
+const aiPreferenceRate = totalSavedCards > 0 ? Math.round((totalAiCards / totalSavedCards) * 1000) / 10 : null;
+
+const trend: { date: string; generated: number; acceptanceRate: number }[] = Array.from(dailyMap.entries())
+  .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
+  .map(([date, data]) => ({
+    date,
+    generated: data.generated,
+    acceptanceRate: data.generated > 0 ? Math.round((data.acceptedEdited / data.generated) * 100) : 0,
+  }));
+
+const stats: UserKpiStats = {
+  generated: totalGenerated,
+  accepted: totalAccepted,
+  edited: totalEdited,
+  rejected: totalRejected,
+  acceptanceRate,
+  aiCards: totalAiCards,
+  totalCards: totalSavedCards,
+  aiPreferenceRate,
+  trend,
+};
+
+const hasData = reviews.length > 0 || totalSavedCards > 0;
+---
+
+<Layout title="Flashcard & AI Statistics">
+  <main class="bg-cosmic min-h-screen p-4 sm:p-6 lg:p-8">
+    <div class="mx-auto max-w-4xl pt-2 pb-16">
+      {/* Navigation */}
+      <div class="mb-6 flex items-center justify-between">
+        <a
+          href="/dashboard"
+          class="inline-flex items-center gap-1 text-sm text-purple-300 transition-colors hover:text-purple-100 hover:underline"
+        >
+          &larr; Dashboard
+        </a>
+        <a
+          href="/generate"
+          class="inline-flex items-center gap-1 text-sm text-purple-300 transition-colors hover:text-purple-100 hover:underline"
+        >
+          Generate Flashcards &rarr;
+        </a>
+      </div>
+
+      {/* Header */}
+      <div class="mb-8">
+        <h1
+          class="bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200 bg-clip-text text-3xl font-bold text-transparent md:text-4xl"
+        >
+          Flashcard & AI Statistics
+        </h1>
+        <p class="mt-2 text-sm text-blue-100/70">
+          Track your AI flashcard generation acceptance rate and deck metrics.
+        </p>
+      </div>
+
+      {
+        !hasData ? (
+          <div class="rounded-2xl border border-white/10 bg-white/5 p-12 text-center shadow-xl backdrop-blur-xl">
+            <div class="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-white/10 text-blue-200">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
+              </svg>
+            </div>
+            <h2 class="text-xl font-bold text-white">No generation data yet</h2>
+            <p class="mx-auto mt-2 max-w-md text-sm text-blue-100/70">
+              Start generating flashcards from your study notes to see your acceptance rate, creation preference, and
+              review trends.
+            </p>
+            <div class="mt-6">
+              <a
+                href="/generate"
+                class="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:from-blue-600 hover:to-purple-700"
+              >
+                Generate your first flashcards
+              </a>
+            </div>
+          </div>
+        ) : (
+          <div class="space-y-8">
+            {/* Primary KPI Cards */}
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {/* Acceptance Rate KPI Card */}
+              <div class="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur-xl">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h2 class="text-xs font-semibold tracking-wider text-blue-200/80 uppercase">AI Acceptance Rate</h2>
+                    <p class="mt-1 text-xs text-blue-100/60">Accepted or edited candidates / Total generated</p>
+                  </div>
+                  {stats.acceptanceRate !== null && (
+                    <span
+                      class:list={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        stats.acceptanceRate >= 75
+                          ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                          : "border border-amber-500/30 bg-amber-500/10 text-amber-300"
+                      }`}
+                    >
+                      {stats.acceptanceRate >= 75 ? "Target met (≥75%)" : "Target: ≥75%"}
+                    </span>
+                  )}
+                </div>
+
+                <div class="mt-6 flex items-baseline gap-2">
+                  <span class="text-4xl font-extrabold text-white">
+                    {stats.acceptanceRate !== null ? `${stats.acceptanceRate}%` : "—"}
+                  </span>
+                </div>
+
+                <div class="mt-4 grid grid-cols-3 gap-2 border-t border-white/10 pt-4 text-center">
+                  <div class="rounded-lg bg-emerald-500/10 p-2">
+                    <div class="text-lg font-bold text-emerald-300">{stats.accepted}</div>
+                    <div class="text-[11px] text-emerald-200/70">Accepted</div>
+                  </div>
+                  <div class="rounded-lg bg-purple-500/10 p-2">
+                    <div class="text-lg font-bold text-purple-300">{stats.edited}</div>
+                    <div class="text-[11px] text-purple-200/70">Edited</div>
+                  </div>
+                  <div class="rounded-lg bg-red-500/10 p-2">
+                    <div class="text-lg font-bold text-red-300">{stats.rejected}</div>
+                    <div class="text-[11px] text-red-200/70">Rejected</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Creation Preference KPI Card */}
+              <div class="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur-xl">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h2 class="text-xs font-semibold tracking-wider text-purple-200/80 uppercase">
+                      AI Creation Preference
+                    </h2>
+                    <p class="mt-1 text-xs text-blue-100/60">AI-sourced saved cards / All saved cards</p>
+                  </div>
+                  <span class="inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-0.5 text-xs font-medium text-blue-300">
+                    Target: ≥75%
+                  </span>
+                </div>
+
+                <div class="mt-6 flex items-baseline gap-2">
+                  <span class="text-4xl font-extrabold text-white">
+                    {stats.aiPreferenceRate !== null ? `${stats.aiPreferenceRate}%` : "—"}
+                  </span>
+                  <span class="text-xs text-blue-100/60">
+                    ({stats.aiCards} of {stats.totalCards} cards)
+                  </span>
+                </div>
+
+                <div class="mt-4 rounded-lg border border-blue-500/20 bg-blue-500/5 p-3 text-xs text-blue-200/80">
+                  <span class="font-semibold text-blue-200">Provisional:</span> Manual card creation is planned for
+                  slice S-03. Currently all cards in your deck are generated via AI.
+                </div>
+              </div>
+            </div>
+
+            {/* Volume Summary Cards */}
+            <div class="grid grid-cols-3 gap-4">
+              <div class="rounded-xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-xl">
+                <div class="text-2xl font-bold text-white">{stats.generated}</div>
+                <div class="mt-1 text-xs text-blue-100/60">Total Candidates</div>
+              </div>
+              <div class="rounded-xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-xl">
+                <div class="text-2xl font-bold text-white">{stats.totalCards}</div>
+                <div class="mt-1 text-xs text-blue-100/60">Cards in Deck</div>
+              </div>
+              <div class="rounded-xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-xl">
+                <div class="text-2xl font-bold text-white">{reviews.length}</div>
+                <div class="mt-1 text-xs text-blue-100/60">Review Sessions</div>
+              </div>
+            </div>
+
+            {/* Acceptance Trend Section */}
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur-xl">
+              <div class="mb-6 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 class="text-lg font-bold text-white">Acceptance Rate Trend</h2>
+                  <p class="text-xs text-blue-100/60">Daily acceptance percentage across finalized reviews</p>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-emerald-400">
+                  <span class="inline-block h-0.5 w-4 bg-emerald-400" />
+                  <span>Target: 75%</span>
+                </div>
+              </div>
+
+              {stats.trend.length === 0 ? (
+                <p class="py-8 text-center text-sm text-blue-100/60">No daily trend data available yet.</p>
+              ) : (
+                <div class="space-y-4">
+                  {/* CSS Bar Chart */}
+                  <div class="relative pt-6 pb-2">
+                    {/* 75% Reference Guideline */}
+                    <div
+                      class="pointer-events-none absolute inset-x-0 border-t border-dashed border-emerald-500/50"
+                      style="top: calc(25% + 1.5rem);"
+                    >
+                      <span class="absolute -top-3 right-0 rounded bg-emerald-950/80 px-1 py-0.5 text-[10px] font-medium text-emerald-300">
+                        75% target
+                      </span>
+                    </div>
+
+                    <div
+                      class="grid items-end gap-3"
+                      style={`grid-template-columns: repeat(${Math.min(stats.trend.length, 12)}, minmax(0, 1fr)); height: 180px;`}
+                    >
+                      {stats.trend.slice(-12).map((item) => (
+                        <div class="group flex h-full flex-col items-center justify-end">
+                          <div class="mb-1.5 text-[11px] font-bold text-white/80 transition-opacity">
+                            {item.acceptanceRate}%
+                          </div>
+                          <div
+                            class="relative w-full max-w-[48px] overflow-hidden rounded-t-md bg-white/10"
+                            style="height: 100%;"
+                          >
+                            <div
+                              class:list={`absolute inset-x-0 bottom-0 rounded-t-md transition-all duration-300 ${
+                                item.acceptanceRate >= 75
+                                  ? "bg-gradient-to-t from-emerald-600 to-teal-400"
+                                  : "bg-gradient-to-t from-purple-600 to-blue-400"
+                              }`}
+                              style={`height: ${Math.max(item.acceptanceRate, 4)}%;`}
+                            />
+                          </div>
+                          <div class="mt-2 max-w-full truncate text-[10px] text-white/60">{item.date.slice(5)}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Table Breakdown */}
+                  <div class="mt-6 overflow-x-auto border-t border-white/10 pt-4">
+                    <table class="w-full text-left text-xs">
+                      <thead>
+                        <tr class="border-b border-white/10 text-white/50">
+                          <th class="pb-2 font-medium">Date</th>
+                          <th class="pb-2 font-medium">Generated</th>
+                          <th class="pb-2 font-medium">Acceptance Rate</th>
+                          <th class="pb-2 font-medium">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-white/5 text-white/80">
+                        {stats.trend.map((item) => (
+                          <tr>
+                            <td class="py-2 font-mono text-white/90">{item.date}</td>
+                            <td class="py-2">{item.generated} cards</td>
+                            <td class="py-2 font-semibold text-white">{item.acceptanceRate}%</td>
+                            <td class="py-2">
+                              <span
+                                class:list={`inline-block rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                                  item.acceptanceRate >= 75
+                                    ? "bg-emerald-500/20 text-emerald-300"
+                                    : "bg-amber-500/20 text-amber-300"
+                                }`}
+                              >
+                                {item.acceptanceRate >= 75 ? "≥75% Met" : "<75%"}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </main>
+</Layout>

@@ -24,91 +24,104 @@ export function useFlashcardGeneration() {
   }, []);
 
   const generate = useCallback(async (text: string) => {
+    // Abort any previous pending user request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
+      abortControllerRef.current = null;
     }
 
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-    }, 30_000);
-
     setState({ status: "loading" });
-
-    const makeRequest = async () => {
-      return fetch("/api/flashcards/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-        signal: controller.signal,
-      });
-    };
 
     const parseError = async (res: Response): Promise<string> => {
       try {
         const body = (await res.json()) as { error?: string };
         if (body.error) return body.error;
       } catch {
-        // Response wasn't JSON
+        // Not JSON
       }
       return `Request failed with status ${res.status}`;
     };
 
-    try {
-      // Attempt 1
-      try {
-        const response = await makeRequest();
-        if (response.ok) {
-          const data = (await response.json()) as GenerateResponse;
-          setState({
-            status: "success",
-            generationId: data.generationId,
-            candidates: data.candidates,
-          });
-          return;
-        }
+    const executeAttempt = async (): Promise<GenerateResponse> => {
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      const timeoutId = setTimeout(() => {
+        controller.abort("TIMEOUT");
+      }, 35_000);
 
-        if (!isRetryableStatus(response.status)) {
+      try {
+        const response = await fetch("/api/flashcards/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
           const message = await parseError(response);
-          setState({ status: "error", message });
-          return;
+          const error = new Error(message) as Error & { status: number };
+          error.status = response.status;
+          throw error;
         }
-      } catch (err) {
-        if (err instanceof DOMException && err.name === "AbortError") {
-          setState({ status: "error", message: "Request timed out after 30 seconds" });
-          return;
-        }
-        // Network error on attempt 1: fall through to retry
+
+        const data = (await response.json()) as GenerateResponse;
+        return data;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    };
+
+    // Attempt 1
+    try {
+      const data = await executeAttempt();
+      abortControllerRef.current = null;
+      setState({
+        status: "success",
+        generationId: data.generationId,
+        candidates: data.candidates,
+      });
+      return;
+    } catch (err) {
+      const isAbort = (err instanceof DOMException && err.name === "AbortError") || err === "TIMEOUT";
+      const status = typeof err === "object" && err && "status" in err ? (err as { status: number }).status : 0;
+      const isRetryable = isRetryableStatus(status) || (!isAbort && status === 0);
+
+      if (!isRetryable) {
+        abortControllerRef.current = null;
+        setState({
+          status: "error",
+          message: isAbort
+            ? "Request timed out after 35 seconds"
+            : err instanceof Error
+              ? err.message
+              : "Generation failed",
+        });
+        return;
       }
 
-      // Attempt 2 (silent retry)
+      // Attempt 2 (silent retry on network / 5xx error)
       try {
-        const retryResponse = await makeRequest();
-        if (retryResponse.ok) {
-          const data = (await retryResponse.json()) as GenerateResponse;
-          setState({
-            status: "success",
-            generationId: data.generationId,
-            candidates: data.candidates,
-          });
-          return;
-        }
-
-        const message = await parseError(retryResponse);
-        setState({ status: "error", message });
+        const retryData = await executeAttempt();
+        abortControllerRef.current = null;
+        setState({
+          status: "success",
+          generationId: retryData.generationId,
+          candidates: retryData.candidates,
+        });
+        return;
       } catch (retryErr) {
-        if (retryErr instanceof DOMException && retryErr.name === "AbortError") {
-          setState({ status: "error", message: "Request timed out after 30 seconds" });
-        } else {
-          setState({
-            status: "error",
-            message: retryErr instanceof Error ? retryErr.message : "Network error. Please try again.",
-          });
-        }
+        abortControllerRef.current = null;
+        const isRetryAbort =
+          (retryErr instanceof DOMException && retryErr.name === "AbortError") || retryErr === "TIMEOUT";
+        setState({
+          status: "error",
+          message: isRetryAbort
+            ? "Request timed out after 35 seconds"
+            : retryErr instanceof Error
+              ? retryErr.message
+              : "Network error. Please try again.",
+        });
       }
-    } finally {
-      clearTimeout(timeoutId);
     }
   }, []);
 

@@ -7,6 +7,7 @@ Implement the S-01 north-star slice: a user-facing flow that lets authenticated 
 ## Current State Analysis
 
 What's already in place:
+
 - **Auth**: fully wired — cookie sessions, middleware, protected routes, signin/signup/signout API routes
 - **Database**: `flashcards` table landed with `source: 'ai' | 'manual'` enum + RLS on all 4 operations (F-01 done)
 - **Types**: `Flashcard`, `FlashcardInsert`, `FlashcardUpdate`, `CardSource` exported from `src/types.ts`
@@ -62,16 +63,19 @@ The service layer (`src/lib/services/ai-generation.ts`) is the single place that
 ## Critical Implementation Details
 
 **OpenRouter:**
+
 - Package: `openai` (npm) — OpenRouter exposes an OpenAI-compatible API
 - `baseURL`: `https://openrouter.ai/api/v1`
 - Default model: `openai/gpt-4o-mini` (cost-effective, JSON mode supported, changeable in the service file)
 - Env var: `OPENROUTER_API_KEY` — declared in `astro.config.mjs` env schema as `{ context: "server", access: "secret", optional: true }`; must also be added to `.env.example` and `.dev.vars.example`
 
 **Zod:**
+
 - Not currently in `package.json` — `npm install zod` is the first step of Phase 1
 - AGENTS.md mandates Zod validation on all API inputs
 
 **LLM prompt contract:**
+
 - System prompt instructs: output exactly `{ "cards": [{"front": "question", "back": "answer"}] }` with at most 15 cards, front limited to 500 characters, and back limited to 2,000 characters
 - `response_format: { type: "json_object" }` passed to OpenAI client (supported by gpt-4o-mini via OpenRouter)
 - Request caps output with `max_completion_tokens: 2500`; the service strips optional Markdown code fences, parses `response.cards` (or a top-level array), trims whitespace, filters invalid or over-limit entries, and returns at most 15 `CandidateCard` entries
@@ -79,6 +83,7 @@ The service layer (`src/lib/services/ai-generation.ts`) is the single place that
 - Empty candidate set (zero valid cards) is handled by the component — shows "No cards could be generated from this text" and resets to idle
 
 **Auto-retry:**
+
 - Client-side only, in `useFlashcardGeneration` hook
 - One silent retry only on a network error or HTTP 408, 429, or 5xx response; other 4xx responses fail immediately
 - A shared 30-second `AbortController` deadline covers both attempts so retry cannot extend the request indefinitely
@@ -86,11 +91,13 @@ The service layer (`src/lib/services/ai-generation.ts`) is the single place that
 - Error state shown only after both attempts fail
 
 **Text privacy NFR:**
+
 - `text` lives in the request body → passed to `generateFlashcards(text)` → sent to OpenRouter → discarded
 - No `console.log` of the text value, no DB write, no response body that echoes it back
 - Comment in the generate route and service file marks this as an NFR constraint
 
 **KPI persistence:**
+
 - `generation_reviews` stores only `user_id`, candidate/outcome counts, and timestamps — never source text or rejected card content
 - A generation row is created only when at least one valid candidate exists; empty results return `generationId: null`
 - The finalization function locks the generation row, derives accepted/edited counts from submitted card outcomes and rejected count from `generated_count`, inserts accepted/edited cards, and marks the review finalized in one transaction
@@ -99,25 +106,30 @@ The service layer (`src/lib/services/ai-generation.ts`) is the single place that
 - `/stats` displays current-user aggregates and an acceptance-over-time trend; before manual creation exists, the AI-preference KPI is labeled as provisional
 
 **Soft text validation:**
+
 - Client shows a warning badge when `text.trim().length < 50` ("This text is quite short — generated cards may not be useful")
 - Generate button is disabled only when trimmed text is empty or over 10,000 characters; the textarea uses `maxLength={10000}`
 - API-level Zod schema trims and enforces `min(1)` and `max(10000)` as hard limits
 
 **Card content validation:**
+
 - Front is trimmed and limited to 1–500 characters; back is trimmed and limited to 1–2,000 characters
 - The same limits are enforced by AI candidate filtering, the edit hook, save-route Zod schema, finalization function, and database constraints
 - Invalid inline edits remain open with an error instead of advancing the review
 
 **Missing OpenRouter configuration:**
+
 - Add OpenRouter to `configStatuses` so `Layout.astro` renders the established missing-service banner
 - `generate.astro` computes `Boolean(OPENROUTER_API_KEY)` on the server and passes only that boolean to the React island; the secret value never reaches the browser
 - `FlashcardGenerator` disables generation and explains the missing configuration when the key is absent, rather than waiting for a 500 response
 - Production setup uses `npx wrangler secret put OPENROUTER_API_KEY`; local Cloudflare development continues to use `.dev.vars`
 
 **Auth guard in API routes:**
+
 - `context.locals.user` is already populated by middleware — a simple `if (!context.locals.user)` check at the top of the handler is sufficient (consistent with the existing auth route pattern)
 
 **React component split:**
+
 - `FlashcardGenerator.tsx` is the outer component (manages generation state, owns textarea input)
 - `CardReview` is an inner sub-component within the same file, rendered when candidates arrive (accepts `candidates: CandidateCard[]` prop and uses `useCardReview` internally — avoids conditional hook calls)
 - Hooks in `src/components/hooks/` per AGENTS.md rule
@@ -129,10 +141,12 @@ The service layer (`src/lib/services/ai-generation.ts`) is the single place that
 **Goal**: everything the generation API route needs exists before the route is written.
 
 Files to create:
+
 - `src/lib/services/ai-generation.ts` — new
 - `supabase/migrations/20260824000000_generation_reviews.sql` — new
 
 Files to modify:
+
 - `package.json` — add `openai` and `zod` to `dependencies`
 - `package-lock.json` — updated by `npm install` so CI's `npm ci` installs the new direct dependencies
 - `astro.config.mjs` — add `OPENROUTER_API_KEY` to `env.schema`
@@ -144,6 +158,7 @@ Files to modify:
 - `src/types/database.ts` — regenerate after applying the migration
 
 **`generation_reviews` migration contract:**
+
 - Columns: `id uuid primary key default gen_random_uuid()`, `user_id uuid not null` FK to `auth.users` with cascade delete, `generated_count integer not null check > 0`, non-negative `accepted_count`, `edited_count`, and `rejected_count` integers defaulting to 0, `created_at timestamptz not null default now()`, and nullable `finalized_at timestamptz`
 - Enable RLS with explicit SELECT/INSERT policies scoped to `auth.uid() = user_id`; direct UPDATE/DELETE policies deny client mutation
 - Add trimmed-length constraints to `flashcards.front` (1–500) and `flashcards.back` (1–2,000) so future write paths share the same integrity boundary
@@ -153,6 +168,7 @@ Files to modify:
 - Grant function execution only to `authenticated`
 
 **`src/types.ts` additions** (append after existing exports):
+
 ```typescript
 // AI generation DTOs
 export interface CandidateCard {
@@ -179,6 +195,7 @@ export interface UserKpiStats {
 ```
 
 **`src/lib/services/ai-generation.ts`** contract:
+
 - Imports: `OpenAI` from `"openai"`, `OPENROUTER_API_KEY` from `"astro:env/server"`, `CandidateCard` from `"@/types"`
 - Exports: `async function generateFlashcards(text: string): Promise<CandidateCard[]>`
 - Guards: throws `Error("OPENROUTER_API_KEY is not configured")` if key is falsy
@@ -188,6 +205,7 @@ export interface UserKpiStats {
 - Never logs `text` — adds `// NFR: study text must not be logged or persisted` comment
 
 #### Automated Verification:
+
 - `npm install` succeeds (no peer conflicts)
 - `npx astro sync` regenerates the `astro:env/server` declaration with `OPENROUTER_API_KEY`
 - `npx supabase db reset` applies the review migration and function cleanly
@@ -200,10 +218,12 @@ export interface UserKpiStats {
 **Goal**: two typed, auth-protected, Zod-validated endpoints.
 
 Files to create:
+
 - `src/pages/api/flashcards/generate.ts` — new
 - `src/pages/api/flashcards/index.ts` — new
 
 **`src/pages/api/flashcards/generate.ts`** contract:
+
 - `export const prerender = false`
 - `export const POST: APIRoute`
 - Zod schema: `z.object({ text: z.string().trim().min(1).max(10000) })`
@@ -213,6 +233,7 @@ Files to create:
 - Text value is passed directly to `generateFlashcards` and not referenced again — satisfies NFR
 
 **`src/pages/api/flashcards/index.ts`** contract:
+
 - `export const prerender = false`
 - `export const POST: APIRoute`
 - Zod schema: `z.object({ generationId: z.string().uuid(), cards: z.array(z.object({ front: z.string().trim().min(1).max(500), back: z.string().trim().min(1).max(2000), outcome: z.enum(["accepted", "edited"]) })) })`; an empty cards array is valid
@@ -222,6 +243,7 @@ Files to create:
 - Supabase error: `500 { error: error.message }`
 
 #### Automated Verification:
+
 - `npx tsc --noEmit` exits clean
 - `npm run lint` exits clean
 
@@ -232,11 +254,13 @@ Files to create:
 **Goal**: the interactive generation + review UI, fully typed, all side effects in hooks.
 
 Files to create:
+
 - `src/components/hooks/useFlashcardGeneration.ts` — new
 - `src/components/hooks/useCardReview.ts` — new
 - `src/components/FlashcardGenerator.tsx` — new
 
 **`src/components/hooks/useFlashcardGeneration.ts`** contract:
+
 - Manages fetch lifecycle to `POST /api/flashcards/generate`
 - State union: `{ status: "idle" } | { status: "loading" } | { status: "success"; generationId: string | null; candidates: CandidateCard[] } | { status: "error"; message: string }`
 - `generate(text: string)`: sets loading, creates one 30-second abort deadline shared by both attempts, and retries once only for a network failure or HTTP 408, 429, or 5xx; other 4xx responses fail immediately
@@ -244,6 +268,7 @@ Files to create:
 - Returns `{ state, generate, reset }`
 
 **`src/components/hooks/useCardReview.ts`** contract:
+
 - Initialised with `generationId: string` and `initialCandidates: CandidateCard[]`
 - Internal state: `cards: ReviewCard[]` (extends `CandidateCard` with `id`, `status: "pending" | "accepted" | "rejected"`, `edited: boolean`), `currentIndex: number`, `editState: { front: string; back: string } | null`, `editError: string | null`, `isSaving: boolean`, `savedCount: number | null`, `saveError: string | null`
 - `accept()`: marks `cards[currentIndex]` as accepted, increments index
@@ -256,6 +281,7 @@ Files to create:
 - Returns all state and actions
 
 **`src/components/FlashcardGenerator.tsx`** structure:
+
 ```
 FlashcardGenerator (default export; `isConfigured: boolean` prop)
   — uses useFlashcardGeneration
@@ -283,6 +309,7 @@ CardReview (non-exported inner component, same file)
 - Handles empty candidates: if `candidates.length === 0`, renders "No cards could be generated from this text. Try with more content." and a "Try again" button that calls `onReset()`
 
 #### Automated Verification:
+
 - No `"use client"` in any created file (`grep -r "use client" src/` returns nothing new)
 - `npx tsc --noEmit` exits clean
 - `npm run lint` exits clean
@@ -294,20 +321,24 @@ CardReview (non-exported inner component, same file)
 **Goal**: wire the component into a protected Astro route and link it from the dashboard.
 
 Files to create:
+
 - `src/pages/generate.astro` — new
 - `src/pages/stats.astro` — new
 
 Files to modify:
+
 - `src/middleware.ts` — add `"/generate"` and `"/stats"` to `PROTECTED_ROUTES`
 - `src/pages/dashboard.astro` — add "Generate flashcards" and "View stats" CTAs
 
 **`src/pages/generate.astro`** contract:
+
 ```astro
 ---
 import Layout from "@/layouts/Layout.astro";
 import FlashcardGenerator from "@/components/FlashcardGenerator";
 import { OPENROUTER_API_KEY } from "astro:env/server";
 ---
+
 <Layout title="Generate Flashcards">
   <main class="min-h-screen p-6">
     <FlashcardGenerator isConfigured={Boolean(OPENROUTER_API_KEY)} client:load />
@@ -316,6 +347,7 @@ import { OPENROUTER_API_KEY } from "astro:env/server";
 ```
 
 **`src/middleware.ts`** change:
+
 ```typescript
 const PROTECTED_ROUTES = ["/dashboard", "/generate", "/stats"];
 ```
@@ -324,6 +356,7 @@ const PROTECTED_ROUTES = ["/dashboard", "/generate", "/stats"];
 Add prominent "Generate flashcards" and "View stats" CTAs (anchor tags styled as buttons using Tailwind, linking to `/generate` and `/stats`) to the existing dashboard card section.
 
 **`src/pages/stats.astro`** contract:
+
 - Static Astro page with no React island or chart dependency
 - Uses `Astro.locals.user` and the request-scoped Supabase client; guards missing user/client even though middleware protects the route
 - Selects only the current user's finalized `generation_reviews` count fields/timestamps and flashcard `source` values; RLS remains the primary isolation boundary
@@ -332,6 +365,7 @@ Add prominent "Generate flashcards" and "View stats" CTAs (anchor tags styled as
 - Shows a clear empty state when no reviews exist and labels AI creation preference as provisional until manual creation is available
 
 #### Manual Verification:
+
 - Unauthenticated GET /generate → 302 redirect to /auth/signin
 - Authenticated GET /generate → 200, FlashcardGenerator renders in browser
 - Missing OpenRouter key → existing configuration banner renders and generation controls are disabled
@@ -346,11 +380,13 @@ Add prominent "Generate flashcards" and "View stats" CTAs (anchor tags styled as
 **Goal**: confirm the full pipeline is green before marking the change complete.
 
 #### Automated Verification:
+
 - `npx tsc --noEmit` — no type errors
 - `npm run lint` — no lint errors
 - `npm run build` — build succeeds with the optional OpenRouter key absent; generation requires it at runtime
 
 #### Manual Verification:
+
 - Unauthenticated user visits /generate → redirected to /auth/signin
 - Authenticated user visits /generate → FlashcardGenerator UI renders
 - OpenRouter key absent → configuration banner and disabled generation state render without exposing the key
@@ -408,18 +444,18 @@ Add prominent "Generate flashcards" and "View stats" CTAs (anchor tags styled as
 
 ### Phase 3: React hooks and review component
 
-- [x] 3.1 No `"use client"` in any created file (`grep -r "use client" src/` returns nothing new)
-- [x] 3.2 `npx tsc --noEmit` exits clean
-- [x] 3.3 `npm run lint` exits clean
+- [x] 3.1 No `"use client"` in any created file (`grep -r "use client" src/` returns nothing new) — c934b58
+- [x] 3.2 `npx tsc --noEmit` exits clean — c934b58
+- [x] 3.3 `npm run lint` exits clean — c934b58
 
 ### Phase 4: Generation page, stats page, middleware, and navigation
 
-- [ ] 4.1 Unauthenticated GET /generate → 302 redirect to /auth/signin
-- [ ] 4.2 Authenticated GET /generate → 200, FlashcardGenerator renders in browser
-- [ ] 4.3 Missing OpenRouter key → existing configuration banner renders and generation controls are disabled
-- [ ] 4.4 Unauthenticated GET /stats → 302 redirect to /auth/signin
-- [ ] 4.5 Authenticated GET /stats → 200, only that user's KPI aggregates and trend render
-- [ ] 4.6 Dashboard renders both CTA links
+- [x] 4.1 Unauthenticated GET /generate → 302 redirect to /auth/signin
+- [x] 4.2 Authenticated GET /generate → 200, FlashcardGenerator renders in browser
+- [x] 4.3 Missing OpenRouter key → existing configuration banner renders and generation controls are disabled
+- [x] 4.4 Unauthenticated GET /stats → 302 redirect to /auth/signin
+- [x] 4.5 Authenticated GET /stats → 200, only that user's KPI aggregates and trend render
+- [x] 4.6 Dashboard renders both CTA links
 
 ### Phase 5: End-to-end verification
 

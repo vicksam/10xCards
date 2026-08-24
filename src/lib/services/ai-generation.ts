@@ -1,4 +1,3 @@
-import OpenAI from "openai";
 import { OPENROUTER_API_KEY } from "astro:env/server";
 import type { CandidateCard } from "@/types";
 
@@ -41,25 +40,63 @@ export async function generateFlashcards(text: string): Promise<CandidateCard[]>
     throw new Error("OPENROUTER_API_KEY is not configured");
   }
 
-  const client = new OpenAI({
-    apiKey: OPENROUTER_API_KEY,
-    baseURL: "https://openrouter.ai/api/v1",
-    timeout: 25_000,
-    maxRetries: 0,
-  });
-
-  const response = await client.chat.completions.create({
-    model: "openai/gpt-4o-mini",
-    response_format: { type: "json_object" },
-    max_completion_tokens: 2500,
-    temperature: 0.3,
+  const payload = {
+    model: "google/gemini-2.5-flash",
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: text },
     ],
+    temperature: 0.2,
+    max_tokens: 2500,
+    response_format: { type: "json_object" },
+  };
+
+  const tFetch = Date.now();
+  // eslint-disable-next-line no-console
+  console.log(`[ai-generation] Sending fetch to OpenRouter for ${text.length} chars...`);
+
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${OPENROUTER_API_KEY.trim()}`,
+      "HTTP-Referer": "https://10xcards.app",
+      "X-Title": "10xCards",
+    },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(20_000),
   });
 
-  const content = response.choices[0]?.message?.content;
+  // eslint-disable-next-line no-console
+  console.log(`[ai-generation] OpenRouter response: status ${response.status} in ${Date.now() - tFetch}ms`);
+
+  if (!response.ok) {
+    let errorDetails = `Status ${response.status} ${response.statusText}`;
+    try {
+      const errorJson = (await response.json()) as { error?: { message?: string } | string };
+      if (typeof errorJson.error === "string") {
+        errorDetails = errorJson.error;
+      } else if (errorJson.error?.message) {
+        errorDetails = errorJson.error.message;
+      }
+    } catch {
+      // response wasn't JSON
+    }
+    // eslint-disable-next-line no-console
+    console.error("[ai-generation] OpenRouter error:", errorDetails);
+    throw new Error(`OpenRouter error: ${errorDetails}`);
+  }
+
+  interface OpenRouterResponse {
+    choices?: {
+      message?: {
+        content?: string;
+      };
+    }[];
+  }
+
+  const data = (await response.json()) as OpenRouterResponse;
+  const content = data.choices?.[0]?.message?.content;
   if (!content?.trim()) {
     throw new Error("Empty response received from AI model");
   }
