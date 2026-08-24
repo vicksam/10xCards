@@ -64,12 +64,51 @@ export type Database = {
         }
         Relationships: []
       }
+      generation_reviews: {
+        Row: {
+          accepted_count: number
+          created_at: string
+          edited_count: number
+          finalized_at: string | null
+          generated_count: number
+          id: string
+          rejected_count: number
+          user_id: string
+        }
+        Insert: {
+          accepted_count?: number
+          created_at?: string
+          edited_count?: number
+          finalized_at?: string | null
+          generated_count: number
+          id?: string
+          rejected_count?: number
+          user_id: string
+        }
+        Update: {
+          accepted_count?: number
+          created_at?: string
+          edited_count?: number
+          finalized_at?: string | null
+          generated_count?: number
+          id?: string
+          rejected_count?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      finalize_generation_review: {
+        Args: {
+          cards: Json
+          generation_id: string
+        }
+        Returns: number
+      }
     }
     Enums: {
       card_source: "ai" | "manual"

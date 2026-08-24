@@ -1,7 +1,7 @@
 ---
 change_id: ai-card-generation
 title: AI flashcard generation from pasted text with candidate review
-status: plan_reviewed
+status: implementing
 created: 2026-08-23
 updated: 2026-08-24
 archived_at: null
@@ -9,4 +9,4 @@ archived_at: null
 
 ## Notes
 
-<!-- Free-form notes for this change: links, ad-hoc context, decisions that don't belong in research/frame/plan. -->
+S-01 from roadmap: north-star validation milestone allowing authenticated users to paste study text, trigger AI flashcard generation via OpenRouter, review candidates card-by-card (accept/edit/reject), and save accepted cards to their Supabase deck while tracking core acceptance and preference KPIs.

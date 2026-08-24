@@ -396,10 +396,10 @@ Add prominent "Generate flashcards" and "View stats" CTAs (anchor tags styled as
 
 ### Phase 1: Data contract, dependencies, env, types, and AI service
 
-- [ ] 1.1 `npm install` succeeds (no peer conflicts)
-- [ ] 1.2 `npx astro sync` regenerates the `astro:env/server` declaration with `OPENROUTER_API_KEY`
-- [ ] 1.3 `npx supabase db reset` applies the review migration and function cleanly
-- [ ] 1.4 `npx tsc --noEmit` exits clean (new types and service compile)
+- [x] 1.1 `npm install` succeeds (no peer conflicts)
+- [x] 1.2 `npx astro sync` regenerates the `astro:env/server` declaration with `OPENROUTER_API_KEY`
+- [x] 1.3 `npx supabase db reset` applies the review migration and function cleanly
+- [x] 1.4 `npx tsc --noEmit` exits clean (new types and service compile)
 
 ### Phase 2: API routes
 

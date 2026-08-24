@@ -99,14 +99,15 @@ Environment variables are declared via Astro's `astro:env` schema and are **serv
    npx supabase stop
    ```
 
-### Cloud Supabase project
+### Cloud Supabase & OpenRouter configuration
 
 Add these to `.env` and `.dev.vars`:
 
-| Variable       | Source                                     |
-| -------------- | ------------------------------------------ |
-| `SUPABASE_URL` | Supabase dashboard → Settings → API        |
-| `SUPABASE_KEY` | `anon` public key → Settings → API         |
+| Variable             | Source                                     |
+| -------------------- | ------------------------------------------ |
+| `SUPABASE_URL`       | Supabase dashboard → Settings → API        |
+| `SUPABASE_KEY`       | `anon` public key → Settings → API         |
+| `OPENROUTER_API_KEY` | OpenRouter dashboard → Keys                |
 
 ## Deployment
 
@@ -117,7 +118,7 @@ npm run build
 npx wrangler deploy
 ```
 
-Set `SUPABASE_URL` and `SUPABASE_KEY` as secrets via `npx wrangler secret put` or in the Cloudflare dashboard.
+Set `SUPABASE_URL`, `SUPABASE_KEY`, and `OPENROUTER_API_KEY` as secrets via `npx wrangler secret put <KEY>` (e.g. `npx wrangler secret put OPENROUTER_API_KEY`) or in the Cloudflare dashboard.
 
 ## CI
 
