@@ -403,14 +403,14 @@ Add prominent "Generate flashcards" and "View stats" CTAs (anchor tags styled as
 
 ### Phase 2: API routes
 
-- [x] 2.1 `npx tsc --noEmit` exits clean
-- [x] 2.2 `npm run lint` exits clean
+- [x] 2.1 `npx tsc --noEmit` exits clean — b0da042
+- [x] 2.2 `npm run lint` exits clean — b0da042
 
 ### Phase 3: React hooks and review component
 
-- [ ] 3.1 No `"use client"` in any created file (`grep -r "use client" src/` returns nothing new)
-- [ ] 3.2 `npx tsc --noEmit` exits clean
-- [ ] 3.3 `npm run lint` exits clean
+- [x] 3.1 No `"use client"` in any created file (`grep -r "use client" src/` returns nothing new)
+- [x] 3.2 `npx tsc --noEmit` exits clean
+- [x] 3.3 `npm run lint` exits clean
 
 ### Phase 4: Generation page, stats page, middleware, and navigation
 
