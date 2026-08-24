@@ -450,12 +450,12 @@ Add prominent "Generate flashcards" and "View stats" CTAs (anchor tags styled as
 
 ### Phase 4: Generation page, stats page, middleware, and navigation
 
-- [x] 4.1 Unauthenticated GET /generate → 302 redirect to /auth/signin
-- [x] 4.2 Authenticated GET /generate → 200, FlashcardGenerator renders in browser
-- [x] 4.3 Missing OpenRouter key → existing configuration banner renders and generation controls are disabled
-- [x] 4.4 Unauthenticated GET /stats → 302 redirect to /auth/signin
-- [x] 4.5 Authenticated GET /stats → 200, only that user's KPI aggregates and trend render
-- [x] 4.6 Dashboard renders both CTA links
+- [x] 4.1 Unauthenticated GET /generate → 302 redirect to /auth/signin — 5b2f9f4
+- [x] 4.2 Authenticated GET /generate → 200, FlashcardGenerator renders in browser — 5b2f9f4
+- [x] 4.3 Missing OpenRouter key → existing configuration banner renders and generation controls are disabled — 5b2f9f4
+- [x] 4.4 Unauthenticated GET /stats → 302 redirect to /auth/signin — 5b2f9f4
+- [x] 4.5 Authenticated GET /stats → 200, only that user's KPI aggregates and trend render — 5b2f9f4
+- [x] 4.6 Dashboard renders both CTA links — 5b2f9f4
 
 ### Phase 5: End-to-end verification
 
