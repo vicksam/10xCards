@@ -3,7 +3,7 @@ project: "10xCards"
 version: 1
 status: draft
 created: 2026-08-22
-updated: 2026-08-23
+updated: 2026-08-24
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -104,7 +104,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | Roadmap ID | Change ID | Suggested issue title | Ready for `/10x-plan` | Notes |
 |---|---|---|---|---|
 | F-01 | flashcard-schema | Set up Supabase migrations and flashcards table with RLS | done | — |
-| S-01 | ai-card-generation | AI flashcard generation from pasted text with candidate review | yes | North star; run `/10x-plan ai-card-generation` |
+| S-01 | ai-card-generation | AI flashcard generation from pasted text with candidate review | done | North star; plan reviewed, run `/10x-implement ai-card-generation phase 1` |
 | S-02 | spaced-repetition-session | Spaced repetition study session with SR algorithm | yes | Sequence after S-01 |
 | S-03 | card-management | Manual card creation and flashcard CRUD | yes | Parallel with S-01 |
 
