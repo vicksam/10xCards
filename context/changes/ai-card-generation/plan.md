@@ -26,7 +26,7 @@ After this change is complete:
 3. `/generate` and `/stats` are in `PROTECTED_ROUTES` — unauthenticated visitors are redirected to `/auth/signin`
 4. The `/generate` page renders the full flow: textarea → loading spinner → card-by-card review → explicit save/finish → success state → reset to textarea
 5. `/stats` shows the current user's overall AI acceptance, AI creation preference, and acceptance trend without exposing study text or other users' data
-6. Dashboard has CTAs linking to `/generate` and `/stats`
+6. Dashboard defaults to the Generation screen, and a persistent top navigation bar provides access to Stats and Sign Out
 7. `npx tsc --noEmit` exits clean
 8. `npm run lint` exits clean
 9. `npm run build` succeeds; because `OPENROUTER_API_KEY` is optional in the Astro schema, it is required at runtime for generation but not for the build
@@ -56,7 +56,7 @@ After this change is complete:
 
 ## Implementation Approach
 
-Five phases in dependency order: (1) add the aggregate review schema, install dependencies, and wire env vars, DTO types, and the AI service; (2) API routes with Zod validation, auth guards, and atomic review finalization; (3) React hooks and the review component; (4) Astro generation/stats pages, middleware update, and dashboard CTAs; (5) end-to-end verification.
+Six phases in dependency order: (1) add the aggregate review schema, install dependencies, and wire env vars, DTO types, and the AI service; (2) API routes with Zod validation, auth guards, and atomic review finalization; (3) React hooks and the review component; (4) Astro generation/stats pages, middleware update, and dashboard CTAs; (5) Navigation and Dashboard UX refinement; (6) end-to-end verification.
 
 The service layer (`src/lib/services/ai-generation.ts`) is the single place that knows about OpenRouter. API routes call it and return its output as JSON. The React component calls API routes via `fetch` from the client; it never calls OpenRouter directly.
 
@@ -375,7 +375,27 @@ Add prominent "Generate flashcards" and "View stats" CTAs (anchor tags styled as
 
 ---
 
-## Phase 5: End-to-end verification
+## Phase 5: Navigation and Dashboard UX refinement
+
+**Goal**: refactor the Dashboard to render the generation screen by default, and implement a persistent top navigation bar with login/signout actions across authenticated routes.
+
+Files to modify:
+- `src/layouts/Layout.astro` (or a protected layout) — add the top navigation bar with links to Dashboard, Stats, and a Sign Out button.
+- `src/pages/dashboard.astro` — remove the CTAs added in Phase 4 and render `<FlashcardGenerator>` directly, serving as the default view after login.
+- `src/pages/generate.astro` — redirect to `/dashboard` since Dashboard now hosts this feature, or remove it entirely.
+
+**Layout Changes**:
+- Top navigation should be always present for authenticated users.
+- It should include "Dashboard", "Stats", and "Sign Out" actions.
+
+#### Manual Verification:
+- Dashboard (`/dashboard`) renders the flashcard generator directly.
+- Top navigation bar is visible on both Dashboard and Stats pages.
+- Top navigation bar includes functional links to Dashboard, Stats, and a Sign Out button.
+
+---
+
+## Phase 6: End-to-end verification
 
 **Goal**: confirm the full pipeline is green before marking the change complete.
 
@@ -387,8 +407,8 @@ Add prominent "Generate flashcards" and "View stats" CTAs (anchor tags styled as
 
 #### Manual Verification:
 
-- Unauthenticated user visits /generate → redirected to /auth/signin
-- Authenticated user visits /generate → FlashcardGenerator UI renders
+- Unauthenticated user visits /generate or /dashboard → redirected to /auth/signin
+- Authenticated user visits /dashboard → FlashcardGenerator UI renders
 - OpenRouter key absent → configuration banner and disabled generation state render without exposing the key
 - Paste text >50 chars → no warning; click Generate → spinner visible within 2s (NFR ✓)
 - Paste text <50 chars → soft warning badge shown; Generate button still enabled
@@ -413,7 +433,8 @@ Add prominent "Generate flashcards" and "View stats" CTAs (anchor tags styled as
 - Repeating the same finalization request does not duplicate cards or KPI counts
 - A second user cannot finalize another user's `generationId` or see its KPI row
 - Stats page shows current-user KPI cards and acceptance trend
-- Dashboard renders "Generate flashcards" and "View stats" CTAs
+- Dashboard renders the flashcard generator directly by default
+- Top navigation bar provides access to Stats and Sign Out
 - Production setup documents `npx wrangler secret put OPENROUTER_API_KEY`
 
 ---
@@ -457,36 +478,43 @@ Add prominent "Generate flashcards" and "View stats" CTAs (anchor tags styled as
 - [x] 4.5 Authenticated GET /stats → 200, only that user's KPI aggregates and trend render — 5b2f9f4
 - [x] 4.6 Dashboard renders both CTA links — 5b2f9f4
 
-### Phase 5: End-to-end verification
+### Phase 5: Navigation and Dashboard UX refinement
 
-- [ ] 5.1 `npx tsc --noEmit` — no type errors
-- [ ] 5.2 `npm run lint` — no lint errors
-- [ ] 5.3 `npm run build` — build succeeds with the optional OpenRouter key absent; generation requires it at runtime
-- [ ] 5.4 Unauthenticated user visits /generate → redirected to /auth/signin
-- [ ] 5.5 Authenticated user visits /generate → FlashcardGenerator UI renders
-- [ ] 5.6 OpenRouter key absent → configuration banner and disabled generation state render without exposing the key
-- [ ] 5.7 Paste text >50 chars → no warning; click Generate → spinner visible within 2s (NFR ✓)
-- [ ] 5.8 Paste text <50 chars → soft warning badge shown; Generate button still enabled
-- [ ] 5.9 Empty/whitespace text → Generate remains disabled; input over 10,000 characters cannot be submitted
-- [ ] 5.10 Generation succeeds → card-by-card review shown ("Card 1 of N")
-- [ ] 5.11 Accept card → moves to card 2 of N
-- [ ] 5.12 Reject card → moves to next card
-- [ ] 5.13 Click Edit → inline front/back textareas appear; edit; click Save → accepted + edited, moves to next
-- [ ] 5.14 Empty or over-limit edit → inline validation shown and review does not advance
-- [ ] 5.15 Click Edit → click Cancel → stays on current card in view mode
-- [ ] 5.16 All cards reviewed → summary shown ("X accepted, Y rejected") + "Save to deck" button
-- [ ] 5.17 Click Save → accepted cards inserted to Supabase → "X cards added to your deck" success state
-- [ ] 5.18 Reject all cards → "Finish review" persists a zero-saved review outcome and reaches the success state
-- [ ] 5.19 Persistent save failure → Retry remains available; Discard returns to an empty textarea
-- [ ] 5.20 Click "Generate more" → UI resets to an empty textarea (idle)
-- [ ] 5.21 Generation API failure → auto-retries once silently → shows error + "Try again" button
-- [ ] 5.22 AI response containing more than 15 valid cards → only the first 15 enter review
-- [ ] 5.23 AI response containing an over-limit front/back value → invalid candidate is filtered before review
-- [ ] 5.24 Generation API 400 response → fails immediately without a silent retry
-- [ ] 5.25 POST /api/flashcards/generate without auth → 401 JSON
-- [ ] 5.26 POST /api/flashcards without auth → 401 JSON
-- [ ] 5.27 Repeating the same finalization request does not duplicate cards or KPI counts
-- [ ] 5.28 A second user cannot finalize another user's `generationId` or see its KPI row
-- [ ] 5.29 Stats page shows current-user KPI cards and acceptance trend
-- [ ] 5.30 Dashboard renders "Generate flashcards" and "View stats" CTAs
-- [ ] 5.31 Production setup documents `npx wrangler secret put OPENROUTER_API_KEY`
+- [ ] 5.1 Dashboard (`/dashboard`) renders the flashcard generator directly.
+- [ ] 5.2 Top navigation bar is visible on both Dashboard and Stats pages.
+- [ ] 5.3 Top navigation bar includes functional links to Dashboard, Stats, and a Sign Out button.
+
+### Phase 6: End-to-end verification
+
+- [ ] 6.1 `npx tsc --noEmit` — no type errors
+- [ ] 6.2 `npm run lint` — no lint errors
+- [ ] 6.3 `npm run build` — build succeeds with the optional OpenRouter key absent; generation requires it at runtime
+- [ ] 6.4 Unauthenticated user visits /dashboard or /generate → redirected to /auth/signin
+- [ ] 6.5 Authenticated user visits /dashboard → FlashcardGenerator UI renders
+- [ ] 6.6 OpenRouter key absent → configuration banner and disabled generation state render without exposing the key
+- [ ] 6.7 Paste text >50 chars → no warning; click Generate → spinner visible within 2s (NFR ✓)
+- [ ] 6.8 Paste text <50 chars → soft warning badge shown; Generate button still enabled
+- [ ] 6.9 Empty/whitespace text → Generate remains disabled; input over 10,000 characters cannot be submitted
+- [ ] 6.10 Generation succeeds → card-by-card review shown ("Card 1 of N")
+- [ ] 6.11 Accept card → moves to card 2 of N
+- [ ] 6.12 Reject card → moves to next card
+- [ ] 6.13 Click Edit → inline front/back textareas appear; edit; click Save → accepted + edited, moves to next
+- [ ] 6.14 Empty or over-limit edit → inline validation shown and review does not advance
+- [ ] 6.15 Click Edit → click Cancel → stays on current card in view mode
+- [ ] 6.16 All cards reviewed → summary shown ("X accepted, Y rejected") + "Save to deck" button
+- [ ] 6.17 Click Save → accepted cards inserted to Supabase → "X cards added to your deck" success state
+- [ ] 6.18 Reject all cards → "Finish review" persists a zero-saved review outcome and reaches the success state
+- [ ] 6.19 Persistent save failure → Retry remains available; Discard returns to an empty textarea
+- [ ] 6.20 Click "Generate more" → UI resets to an empty textarea (idle)
+- [ ] 6.21 Generation API failure → auto-retries once silently → shows error + "Try again" button
+- [ ] 6.22 AI response containing more than 15 valid cards → only the first 15 enter review
+- [ ] 6.23 AI response containing an over-limit front/back value → invalid candidate is filtered before review
+- [ ] 6.24 Generation API 400 response → fails immediately without a silent retry
+- [ ] 6.25 POST /api/flashcards/generate without auth → 401 JSON
+- [ ] 6.26 POST /api/flashcards without auth → 401 JSON
+- [ ] 6.27 Repeating the same finalization request does not duplicate cards or KPI counts
+- [ ] 6.28 A second user cannot finalize another user's `generationId` or see its KPI row
+- [ ] 6.29 Stats page shows current-user KPI cards and acceptance trend
+- [ ] 6.30 Dashboard renders the flashcard generator directly by default
+- [ ] 6.31 Top navigation bar provides access to Stats and Sign Out
+- [ ] 6.32 Production setup documents `npx wrangler secret put OPENROUTER_API_KEY`
