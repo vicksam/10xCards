@@ -480,41 +480,41 @@ Files to modify:
 
 ### Phase 5: Navigation and Dashboard UX refinement
 
-- [x] 5.1 Dashboard (`/dashboard`) renders the flashcard generator directly.
-- [x] 5.2 Top navigation bar is visible on both Dashboard and Stats pages.
-- [x] 5.3 Top navigation bar includes functional links to Dashboard, Stats, and a Sign Out button.
+- [x] 5.1 Dashboard (`/dashboard`) renders the flashcard generator directly. — e19ed65
+- [x] 5.2 Top navigation bar is visible on both Dashboard and Stats pages. — e19ed65
+- [x] 5.3 Top navigation bar includes functional links to Dashboard, Stats, and a Sign Out button. — e19ed65
 
 ### Phase 6: End-to-end verification
 
-- [ ] 6.1 `npx tsc --noEmit` — no type errors
-- [ ] 6.2 `npm run lint` — no lint errors
-- [ ] 6.3 `npm run build` — build succeeds with the optional OpenRouter key absent; generation requires it at runtime
-- [ ] 6.4 Unauthenticated user visits /dashboard or /generate → redirected to /auth/signin
-- [ ] 6.5 Authenticated user visits /dashboard → FlashcardGenerator UI renders
-- [ ] 6.6 OpenRouter key absent → configuration banner and disabled generation state render without exposing the key
-- [ ] 6.7 Paste text >50 chars → no warning; click Generate → spinner visible within 2s (NFR ✓)
-- [ ] 6.8 Paste text <50 chars → soft warning badge shown; Generate button still enabled
-- [ ] 6.9 Empty/whitespace text → Generate remains disabled; input over 10,000 characters cannot be submitted
-- [ ] 6.10 Generation succeeds → card-by-card review shown ("Card 1 of N")
-- [ ] 6.11 Accept card → moves to card 2 of N
-- [ ] 6.12 Reject card → moves to next card
-- [ ] 6.13 Click Edit → inline front/back textareas appear; edit; click Save → accepted + edited, moves to next
-- [ ] 6.14 Empty or over-limit edit → inline validation shown and review does not advance
-- [ ] 6.15 Click Edit → click Cancel → stays on current card in view mode
-- [ ] 6.16 All cards reviewed → summary shown ("X accepted, Y rejected") + "Save to deck" button
-- [ ] 6.17 Click Save → accepted cards inserted to Supabase → "X cards added to your deck" success state
-- [ ] 6.18 Reject all cards → "Finish review" persists a zero-saved review outcome and reaches the success state
-- [ ] 6.19 Persistent save failure → Retry remains available; Discard returns to an empty textarea
-- [ ] 6.20 Click "Generate more" → UI resets to an empty textarea (idle)
-- [ ] 6.21 Generation API failure → auto-retries once silently → shows error + "Try again" button
-- [ ] 6.22 AI response containing more than 15 valid cards → only the first 15 enter review
-- [ ] 6.23 AI response containing an over-limit front/back value → invalid candidate is filtered before review
-- [ ] 6.24 Generation API 400 response → fails immediately without a silent retry
-- [ ] 6.25 POST /api/flashcards/generate without auth → 401 JSON
-- [ ] 6.26 POST /api/flashcards without auth → 401 JSON
-- [ ] 6.27 Repeating the same finalization request does not duplicate cards or KPI counts
-- [ ] 6.28 A second user cannot finalize another user's `generationId` or see its KPI row
-- [ ] 6.29 Stats page shows current-user KPI cards and acceptance trend
-- [ ] 6.30 Dashboard renders the flashcard generator directly by default
-- [ ] 6.31 Top navigation bar provides access to Stats and Sign Out
-- [ ] 6.32 Production setup documents `npx wrangler secret put OPENROUTER_API_KEY`
+- [x] 6.1 `npx tsc --noEmit` — no type errors
+- [x] 6.2 `npm run lint` — no lint errors
+- [x] 6.3 `npm run build` — build succeeds with the optional OpenRouter key absent; generation requires it at runtime
+- [x] 6.4 Unauthenticated user visits /dashboard or /generate → redirected to /auth/signin
+- [x] 6.5 Authenticated user visits /dashboard → FlashcardGenerator UI renders
+- [x] 6.6 OpenRouter key absent → configuration banner and disabled generation state render without exposing the key
+- [x] 6.7 Paste text >50 chars → no warning; click Generate → spinner visible within 2s (NFR ✓)
+- [x] 6.8 Paste text <50 chars → soft warning badge shown; Generate button still enabled
+- [x] 6.9 Empty/whitespace text → Generate remains disabled; input over 10,000 characters cannot be submitted
+- [x] 6.10 Generation succeeds → card-by-card review shown ("Card 1 of N")
+- [x] 6.11 Accept card → moves to card 2 of N
+- [x] 6.12 Reject card → moves to next card
+- [x] 6.13 Click Edit → inline front/back textareas appear; edit; click Save → accepted + edited, moves to next
+- [x] 6.14 Empty or over-limit edit → inline validation shown and review does not advance
+- [x] 6.15 Click Edit → click Cancel → stays on current card in view mode
+- [x] 6.16 All cards reviewed → summary shown ("X accepted, Y rejected") + "Save to deck" button
+- [x] 6.17 Click Save → accepted cards inserted to Supabase → "X cards added to your deck" success state
+- [x] 6.18 Reject all cards → "Finish review" persists a zero-saved review outcome and reaches the success state
+- [x] 6.19 Persistent save failure → Retry remains available; Discard returns to an empty textarea
+- [x] 6.20 Click "Generate more" → UI resets to an empty textarea (idle)
+- [x] 6.21 Generation API failure → auto-retries once silently → shows error + "Try again" button
+- [x] 6.22 AI response containing more than 15 valid cards → only the first 15 enter review
+- [x] 6.23 AI response containing an over-limit front/back value → invalid candidate is filtered before review
+- [x] 6.24 Generation API 400 response → fails immediately without a silent retry
+- [x] 6.25 POST /api/flashcards/generate without auth → 401 JSON
+- [x] 6.26 POST /api/flashcards without auth → 401 JSON
+- [x] 6.27 Repeating the same finalization request does not duplicate cards or KPI counts
+- [x] 6.28 A second user cannot finalize another user's `generationId` or see its KPI row
+- [x] 6.29 Stats page shows current-user KPI cards and acceptance trend
+- [x] 6.30 Dashboard renders the flashcard generator directly by default
+- [x] 6.31 Top navigation bar provides access to Stats and Sign Out
+- [x] 6.32 Production setup documents `npx wrangler secret put OPENROUTER_API_KEY`

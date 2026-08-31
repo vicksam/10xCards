@@ -262,7 +262,7 @@ function CardReview({ generationId, candidates, onReset }: CardReviewProps) {
                   variant="outline"
                   size="sm"
                   onClick={onReset}
-                  className="border-white/20 text-white"
+                  className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
                 >
                   Discard / Generate more
                 </Button>
@@ -404,7 +404,7 @@ function CardReview({ generationId, candidates, onReset }: CardReviewProps) {
                 variant="outline"
                 size="sm"
                 onClick={cancelEdit}
-                className="border-white/20 text-white"
+                className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
               >
                 Cancel
               </Button>
