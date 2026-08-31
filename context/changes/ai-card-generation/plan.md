@@ -480,9 +480,9 @@ Files to modify:
 
 ### Phase 5: Navigation and Dashboard UX refinement
 
-- [ ] 5.1 Dashboard (`/dashboard`) renders the flashcard generator directly.
-- [ ] 5.2 Top navigation bar is visible on both Dashboard and Stats pages.
-- [ ] 5.3 Top navigation bar includes functional links to Dashboard, Stats, and a Sign Out button.
+- [x] 5.1 Dashboard (`/dashboard`) renders the flashcard generator directly.
+- [x] 5.2 Top navigation bar is visible on both Dashboard and Stats pages.
+- [x] 5.3 Top navigation bar includes functional links to Dashboard, Stats, and a Sign Out button.
 
 ### Phase 6: End-to-end verification
 

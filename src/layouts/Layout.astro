@@ -2,12 +2,15 @@
 import "../styles/global.css";
 import Banner from "@/components/Banner.astro";
 import { missingConfigs } from "@/lib/config-status";
+import { cn } from "@/lib/utils";
 
 interface Props {
   title?: string;
 }
 
-const { title = "10x Astro Starter" } = Astro.props;
+const { title = "10xCards" } = Astro.props;
+const { user } = Astro.locals;
+const pathname = Astro.url.pathname;
 ---
 
 <!doctype html>
@@ -34,6 +37,59 @@ const { title = "10x Astro Starter" } = Astro.props;
           )}
         </Banner>
       ))
+    }
+    {
+      user && (
+        <header class="sticky top-0 z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-md">
+          <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-6 sm:gap-8">
+              <a
+                href="/dashboard"
+                class="flex items-center gap-2 text-lg font-bold text-white transition-opacity hover:opacity-90"
+              >
+                <span class="bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">
+                  10xCards
+                </span>
+              </a>
+              <nav class="flex items-center gap-1 sm:gap-2">
+                <a
+                  href="/dashboard"
+                  class:list={cn(
+                    "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                    pathname === "/dashboard" || pathname === "/generate"
+                      ? "bg-white/15 text-white"
+                      : "text-blue-100/70 hover:bg-white/10 hover:text-white",
+                  )}
+                >
+                  Dashboard
+                </a>
+                <a
+                  href="/stats"
+                  class:list={cn(
+                    "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                    pathname === "/stats"
+                      ? "bg-white/15 text-white"
+                      : "text-blue-100/70 hover:bg-white/10 hover:text-white",
+                  )}
+                >
+                  Stats
+                </a>
+              </nav>
+            </div>
+            <div class="flex items-center gap-3 sm:gap-4">
+              {user.email && <span class="hidden text-xs text-blue-100/60 sm:inline-block">{user.email}</span>}
+              <form method="POST" action="/api/auth/signout" class="inline">
+                <button
+                  type="submit"
+                  class="cursor-pointer rounded-lg border border-white/20 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/80 transition-colors hover:bg-white/15 hover:text-white"
+                >
+                  Sign Out
+                </button>
+              </form>
+            </div>
+          </div>
+        </header>
+      )
     }
     <slot />
   </body>

@@ -79,22 +79,6 @@ const hasData = reviews.length > 0 || totalSavedCards > 0;
 <Layout title="Flashcard & AI Statistics">
   <main class="bg-cosmic min-h-screen p-4 sm:p-6 lg:p-8">
     <div class="mx-auto max-w-4xl pt-2 pb-16">
-      {/* Navigation */}
-      <div class="mb-6 flex items-center justify-between">
-        <a
-          href="/dashboard"
-          class="inline-flex items-center gap-1 text-sm text-purple-300 transition-colors hover:text-purple-100 hover:underline"
-        >
-          &larr; Dashboard
-        </a>
-        <a
-          href="/generate"
-          class="inline-flex items-center gap-1 text-sm text-purple-300 transition-colors hover:text-purple-100 hover:underline"
-        >
-          Generate Flashcards &rarr;
-        </a>
-      </div>
-
       {/* Header */}
       <div class="mb-8">
         <h1
@@ -134,7 +118,7 @@ const hasData = reviews.length > 0 || totalSavedCards > 0;
             </p>
             <div class="mt-6">
               <a
-                href="/generate"
+                href="/dashboard"
                 class="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:from-blue-600 hover:to-purple-700"
               >
                 Generate your first flashcards
