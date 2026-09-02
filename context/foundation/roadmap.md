@@ -3,7 +3,7 @@ project: "10xCards"
 version: 1
 status: draft
 created: 2026-08-22
-updated: 2026-08-24
+updated: 2026-09-03
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -31,7 +31,7 @@ Manual flashcard creation is slow and happens when energy is lowest — after a 
 |---|---|---|---|---|---|
 | F-01 | flashcard-schema | (foundation) Supabase migration pipeline and flashcards table with RLS landed | — | Access Control | done |
 | S-01 | ai-card-generation | paste study text, trigger AI generation, review candidates (accept/edit/reject), and save accepted cards | F-01 | US-01, FR-001, FR-002, FR-003, FR-004 | done |
-| S-02 | spaced-repetition-session | start a spaced repetition study session with scheduling | F-01 | FR-007 | in-progress |
+| S-02 | spaced-repetition-session | start a spaced repetition study session with scheduling | F-01 | FR-007 | planning |
 | S-03 | card-management | manually create a flashcard and view, edit, delete saved flashcards | F-01 | FR-005, FR-006 | ready |
 
 ## Baseline
@@ -85,7 +85,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Integrating an SR algorithm (SM-2/FSRS) is low-risk technically (mature libraries exist), but the review-loop UI must be reliable — the guardrail KPI ("Study Session Reliability") gates launch. Scheduling metadata extends the base schema from F-01. Sequenced after S-01 in the speed bias because study sessions require cards in the deck to be meaningful.
-- **Status:** in-progress
+- **Status:** planning
 
 ### S-03: Manual card creation and flashcard management
 
