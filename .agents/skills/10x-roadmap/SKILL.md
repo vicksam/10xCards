@@ -193,7 +193,7 @@ The "what's already in place" assessment shouldn't fall on the user — the code
 **Layers to probe** (skip a layer if `tech-stack.md` already names that layer's choice — report "per tech-stack.md: <choice>" instead of probing):
 
 | Layer | What the probe looks for |
-| -------------- | ----------------------------------------------------------------------------------------------------------------- |
+|---|---|
 | Frontend | UI framework, build tooling, routing, component libraries — `package.json` deps, framework config files |
 | Backend / API | Server framework, API routes, request handlers — entrypoints, route files, controllers |
 | Data | DB driver, ORM/query builder, schema/migration tooling, seeded data — schema files, migration directories |
@@ -471,7 +471,7 @@ be able to read the section cold.>
 ## At a glance
 
 | ID | Change ID | Outcome (user can …) | Prerequisites | PRD refs | Status |
-| ----- | ---------------------- | --------------------------------- | ---------------- | -------------- | -------- |
+|---|---|---|---|---|---|
 | F-01 | <kebab-case-change-id> | (foundation) <foundation outcome> | — | NFR-XX | proposed |
 | F-02 | <kebab-case-change-id> | (foundation) <foundation outcome> | F-01 | NFR-YY | proposed |
 | S-01 | <kebab-case-change-id> | <user-can outcome> | F-01 | US-01, FR-001 | ready |
@@ -483,7 +483,7 @@ be able to read the section cold.>
 Navigation aid — groups items that share a Prerequisites chain. Canonical ordering still lives in the dependency graph below; this table is the proposed reading order across parallel tracks.
 
 | Stream | Theme | Chain | Note |
-| ------ | ------------------ | ------------------------------ | --------------------------------------------------------- |
+|---|---|---|---|
 | A | <Theme> | `F-01` → `S-01` → `S-02` | <One-line rationale tying the stream to main_goal.> |
 | B | <Theme> | `F-02` → `S-03` | <Joins Stream A at `S-NN` if applicable, else standalone.> |
 | C | <Theme> | `S-NN` | <Standalone slice with no foundation prerequisite.> |
@@ -540,7 +540,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 ## Backlog Handoff
 
 | Roadmap ID | Change ID | Suggested issue title | Ready for `/10x-plan` | Notes |
-| ---------- | ---------------------- | ----------------------------- | --------------------- | ----- |
+|---|---|---|---|---|
 | F-01 | <kebab-case-change-id> | <issue title for Jira/Linear> | no | <why or `—`> |
 | S-01 | <kebab-case-change-id> | <issue title for Jira/Linear> | yes | Run `/10x-plan <change-id>` |
 
