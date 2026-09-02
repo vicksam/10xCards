@@ -1,10 +1,10 @@
 ---
 change_id: ai-card-generation
 title: AI flashcard generation from pasted text with candidate review
-status: impl_reviewed
+status: archived
 created: 2026-08-23
-updated: 2026-09-01
-archived_at: null
+updated: 2026-09-02
+archived_at: 2026-09-02
 ---
 
 ## Notes

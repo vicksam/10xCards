@@ -30,8 +30,8 @@ Manual flashcard creation is slow and happens when energy is lowest — after a 
 | ID | Change ID | Outcome (user can …) | Prerequisites | PRD refs | Status |
 |---|---|---|---|---|---|
 | F-01 | flashcard-schema | (foundation) Supabase migration pipeline and flashcards table with RLS landed | — | Access Control | done |
-| S-01 | ai-card-generation | paste study text, trigger AI generation, review candidates (accept/edit/reject), and save accepted cards | F-01 | US-01, FR-001, FR-002, FR-003, FR-004 | in-progress |
-| S-02 | spaced-repetition-session | start a spaced repetition study session with scheduling | F-01 | FR-007 | ready |
+| S-01 | ai-card-generation | paste study text, trigger AI generation, review candidates (accept/edit/reject), and save accepted cards | F-01 | US-01, FR-001, FR-002, FR-003, FR-004 | done |
+| S-02 | spaced-repetition-session | start a spaced repetition study session with scheduling | F-01 | FR-007 | in-progress |
 | S-03 | card-management | manually create a flashcard and view, edit, delete saved flashcards | F-01 | FR-005, FR-006 | ready |
 
 ## Baseline
@@ -73,7 +73,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** LLM integration quality directly determines both primary KPIs (≥75% acceptance, ≥75% AI preference). The NFR requiring study text to leave no trace in operator-accessible storage after generation constrains the implementation. Auth (FR-001, FR-002) is already baseline-present and not re-implemented here. Sequenced as the north star — without this flow, there is nothing to measure.
-- **Status:** in-progress
+- **Status:** done
 
 ### S-02: Spaced repetition study session
 
@@ -85,7 +85,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Integrating an SR algorithm (SM-2/FSRS) is low-risk technically (mature libraries exist), but the review-loop UI must be reliable — the guardrail KPI ("Study Session Reliability") gates launch. Scheduling metadata extends the base schema from F-01. Sequenced after S-01 in the speed bias because study sessions require cards in the deck to be meaningful.
-- **Status:** ready
+- **Status:** in-progress
 
 ### S-03: Manual card creation and flashcard management
 
@@ -124,3 +124,4 @@ _None — all product-level decisions were locked during shaping (PRD §Open Que
 ## Done
 
 - **F-01: (foundation) Supabase migration pipeline and flashcards table with RLS landed** — Archived 2026-08-23 → `context/archive/2026-08-23-flashcard-schema/`. Lesson: —.
+- **S-01: AI flashcard generation and candidate review** — Archived 2026-09-02 → `context/archive/2026-09-02-ai-card-generation/`. Lesson: —.
