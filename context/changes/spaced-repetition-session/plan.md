@@ -492,34 +492,34 @@ The S-02 migration (`20260903000000_srs_schema.sql`) is additive:
 
 #### Automated
 
-- [x] 1.1 `npx supabase migration up` exits 0 with no errors
-- [x] 1.2 `npx supabase gen types typescript --local` completes without error
-- [x] 1.3 `npm run lint` passes with no new errors
-- [x] 1.4 `npm run build` succeeds
+- [x] 1.1 `npx supabase migration up` exits 0 with no errors — a477fc1
+- [x] 1.2 `npx supabase gen types typescript --local` completes without error — a477fc1
+- [x] 1.3 `npm run lint` passes with no new errors — a477fc1
+- [x] 1.4 `npm run build` succeeds — a477fc1
 
 #### Manual
 
-- [x] 1.5 Supabase Studio shows `flashcards` with 17 columns including all 10 FSRS fields
-- [x] 1.6 Supabase Studio shows `review_logs` table with RLS enabled
-- [x] 1.7 Existing flashcard rows have `due = created_at`
-- [x] 1.8 New flashcard rows (via RPC) have correct FSRS defaults (`state=0`, `reps=0`, `due≈now`)
+- [x] 1.5 Supabase Studio shows `flashcards` with 17 columns including all 10 FSRS fields — a477fc1
+- [x] 1.6 Supabase Studio shows `review_logs` table with RLS enabled — a477fc1
+- [x] 1.7 Existing flashcard rows have `due = created_at` — a477fc1
+- [x] 1.8 New flashcard rows (via RPC) have correct FSRS defaults (`state=0`, `reps=0`, `due≈now`) — a477fc1
 
 ### Phase 2: API Layer
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` passes
-- [ ] 2.2 `npm run build` succeeds
-- [ ] 2.3 TypeScript type-checks pass (no `any` casts)
+- [x] 2.1 `npm run lint` passes
+- [x] 2.2 `npm run build` succeeds
+- [x] 2.3 TypeScript type-checks pass (no `any` casts)
 
 #### Manual
 
-- [ ] 2.4 Valid POST to `/api/study/review` returns 200 with `{ due, state, scheduled_days }`
-- [ ] 2.5 `flashcards` row updates correctly after rating
-- [ ] 2.6 New row appears in `review_logs` with correct fields
-- [ ] 2.7 No auth cookie → 401
-- [ ] 2.8 Invalid rating (e.g. 5) → 400
-- [ ] 2.9 Other user's `flashcard_id` → 404
+- [x] 2.4 Valid POST to `/api/study/review` returns 200 with `{ due, state, scheduled_days }`
+- [x] 2.5 `flashcards` row updates correctly after rating
+- [x] 2.6 New row appears in `review_logs` with correct fields
+- [x] 2.7 No auth cookie → 401
+- [x] 2.8 Invalid rating (e.g. 5) → 400
+- [x] 2.9 Other user's `flashcard_id` → 404
 
 ### Phase 3: Study UI
 
