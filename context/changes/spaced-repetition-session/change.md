@@ -1,7 +1,7 @@
 ---
 change_id: spaced-repetition-session
 title: Spaced repetition session
-status: implemented
+status: impl_reviewed
 created: 2026-09-02
 updated: 2026-09-04
 archived_at: null
