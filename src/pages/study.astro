@@ -1,0 +1,27 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import StudySession from "@/components/StudySession";
+import { createClient } from "@/lib/supabase";
+import type { Flashcard } from "@/types";
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+
+let dueCards: Flashcard[] = [];
+if (supabase) {
+  const { data } = await supabase
+    .from("flashcards")
+    .select("*")
+    .lte("due", new Date().toISOString())
+    .order("due", { ascending: true })
+    .limit(20);
+  dueCards = data ?? [];
+}
+---
+
+<Layout title="Study - 10xCards">
+  <main class="bg-cosmic min-h-screen p-4 sm:p-6 lg:p-8">
+    <div class="mx-auto max-w-3xl pt-4 pb-12">
+      <StudySession cards={dueCards} client:load />
+    </div>
+  </main>
+</Layout>

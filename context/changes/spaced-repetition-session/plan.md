@@ -508,36 +508,36 @@ The S-02 migration (`20260903000000_srs_schema.sql`) is additive:
 
 #### Automated
 
-- [x] 2.1 `npm run lint` passes
-- [x] 2.2 `npm run build` succeeds
-- [x] 2.3 TypeScript type-checks pass (no `any` casts)
+- [x] 2.1 `npm run lint` passes — 9447626
+- [x] 2.2 `npm run build` succeeds — 9447626
+- [x] 2.3 TypeScript type-checks pass (no `any` casts) — 9447626
 
 #### Manual
 
-- [x] 2.4 Valid POST to `/api/study/review` returns 200 with `{ due, state, scheduled_days }`
-- [x] 2.5 `flashcards` row updates correctly after rating
-- [x] 2.6 New row appears in `review_logs` with correct fields
-- [x] 2.7 No auth cookie → 401
-- [x] 2.8 Invalid rating (e.g. 5) → 400
-- [x] 2.9 Other user's `flashcard_id` → 404
+- [x] 2.4 Valid POST to `/api/study/review` returns 200 with `{ due, state, scheduled_days }` — 9447626
+- [x] 2.5 `flashcards` row updates correctly after rating — 9447626
+- [x] 2.6 New row appears in `review_logs` with correct fields — 9447626
+- [x] 2.7 No auth cookie → 401 — 9447626
+- [x] 2.8 Invalid rating (e.g. 5) → 400 — 9447626
+- [x] 2.9 Other user's `flashcard_id` → 404 — 9447626
 
 ### Phase 3: Study UI
 
 #### Automated
 
-- [ ] 3.1 `npm run lint` passes
-- [ ] 3.2 `npm run build` succeeds
-- [ ] 3.3 TypeScript type-checks pass
+- [x] 3.1 `npm run lint` passes
+- [x] 3.2 `npm run build` succeeds
+- [x] 3.3 TypeScript type-checks pass
 
 #### Manual
 
-- [ ] 3.4 `/study` while signed out redirects to `/auth/signin`
-- [ ] 3.5 `/study` with due cards shows progress bar and first card front
-- [ ] 3.6 "Show answer" reveals card back
-- [ ] 3.7 Rating a card advances to the next, resets flip state
-- [ ] 3.8 Rating all cards shows completion screen with dashboard link
-- [ ] 3.9 No due cards → empty state with dashboard link
-- [ ] 3.10 Topbar shows "Study" link for signed-in users
+- [x] 3.4 `/study` while signed out redirects to `/auth/signin`
+- [x] 3.5 `/study` with due cards shows progress bar and first card front
+- [x] 3.6 "Show answer" reveals card back
+- [x] 3.7 Rating a card advances to the next, resets flip state
+- [x] 3.8 Rating all cards shows completion screen with dashboard link
+- [x] 3.9 No due cards → empty state with dashboard link
+- [x] 3.10 Topbar shows "Study" link for signed-in users
 
 ### Phase 4: Verification
 
