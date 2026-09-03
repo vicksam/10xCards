@@ -543,14 +543,14 @@ The S-02 migration (`20260903000000_srs_schema.sql`) is additive:
 
 #### Automated
 
-- [x] 4.1 `npm run lint` passes (full repo, no regressions)
-- [x] 4.2 `npm run build` succeeds
+- [x] 4.1 `npm run lint` passes (full repo, no regressions) — 1750717
+- [x] 4.2 `npm run build` succeeds — 1750717
 
 #### Manual
 
-- [x] 4.3 Full session smoke test: flip → rate → DB updated → review_logs row created
-- [x] 4.4 New AI-generated cards appear in study queue with `state=0` and `due ≤ now`
-- [x] 4.5 After rating all cards, re-visiting `/study` shows empty state
-- [x] 4.6 Existing card backfill confirmed: `due = created_at`
-- [x] 4.7 `finalize_generation_review` RPC produces correct FSRS defaults on new rows
-- [x] 4.8 Local Supabase stopped after testing (`npx supabase stop`)
+- [x] 4.3 Full session smoke test: flip → rate → DB updated → review_logs row created — 1750717
+- [x] 4.4 New AI-generated cards appear in study queue with `state=0` and `due ≤ now` — 1750717
+- [x] 4.5 After rating all cards, re-visiting `/study` shows empty state — 1750717
+- [x] 4.6 Existing card backfill confirmed: `due = created_at` — 1750717
+- [x] 4.7 `finalize_generation_review` RPC produces correct FSRS defaults on new rows — 1750717
+- [x] 4.8 Local Supabase stopped after testing (`npx supabase stop`) — 1750717
