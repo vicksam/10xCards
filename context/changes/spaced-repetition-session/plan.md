@@ -154,14 +154,21 @@ export type ReviewLogInsert = Database["public"]["Tables"]["review_logs"]["Inser
 
 // Study session DTOs
 export interface ReviewRequest {
-  flashcard_id: string;  // uuid
-  rating: 1 | 2 | 3 | 4; // Again | Hard | Good | Easy
+  flashcard_id: string;       // uuid — card being rated
+  rating: 1 | 2 | 3 | 4;     // Again | Hard | Good | Easy
+  next_flashcard_id?: string; // uuid — next card in queue (omit if last card)
 }
 
 export interface ReviewResponse {
   due: string;            // ISO timestamp — next review date
   state: number;          // 0-3 FSRS State enum
-  scheduled_days: number; // days until next review
+  scheduled_days: number; // days until next review (applied result)
+  next_intervals: {       // preview intervals for the *next* card's buttons
+    again: number;        // days if rated Again
+    hard: number;         // days if rated Hard
+    good: number;         // days if rated Good
+    easy: number;         // days if rated Easy
+  } | null;               // null when queue is exhausted (no next card)
 }
 ```
 
@@ -212,7 +219,8 @@ Add the `POST /api/study/review` route that fetches the card, runs `TypeConvert.
 - `export const prerender = false`
 - `export const POST: APIRoute`
 - Guard order: auth → JSON parse → Zod → supabase null-check → fetch card → FSRS → DB writes → 200
-- Zod schema: `z.object({ flashcard_id: z.uuid(), rating: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]) })`
+- Zod schema: `z.object({ flashcard_id: z.uuid(), rating: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]), next_flashcard_id: z.uuid().optional() })`
+- Supabase null-check: `const supabase = createClient(context.request.headers, context.cookies); if (!supabase) return Response.json({ error: "Supabase is not configured" }, { status: 503 })` — mirrors the guard in `src/pages/api/flashcards/index.ts:42-44`
 - Fetch the card row: `supabase.from('flashcards').select('*').eq('id', flashcard_id).eq('user_id', user.id).single()` — the `eq('user_id', ...)` guard prevents rating another user's card even if RLS is misconfigured
 - If card not found: return 404 `{ error: "Card not found" }`
 - Deserialize: `TypeConvert.card(cardRow)` from `ts-fsrs`
@@ -240,10 +248,10 @@ const { card: updatedCard, log } = scheduler.next(
 )
 ```
 
-- Persist card update: `supabase.from('flashcards').update({ due, stability, difficulty, elapsed_days, scheduled_days, learning_steps, reps, lapses, state, last_review }).eq('id', flashcard_id)`
-- Persist review log: `supabase.from('review_logs').insert({ flashcard_id, user_id: user.id, rating: log.rating, state: log.state, scheduled_days: log.scheduled_days, due: log.due, review: log.review, stability: log.stability, difficulty: log.difficulty })`
-- On any DB error: return 500 `{ error: error.message }`
-- On success: return 200 `{ due: updatedCard.due, state: updatedCard.state, scheduled_days: updatedCard.scheduled_days }` — shape matches `ReviewResponse`
+- Persist card update: `const { error: updateError } = await supabase.from('flashcards').update({ due, stability, difficulty, elapsed_days, scheduled_days, learning_steps, reps, lapses, state, last_review }).eq('id', flashcard_id)`. If `updateError`: return 500.
+- Persist review log: `const { error: insertError } = await supabase.from('review_logs').insert({ flashcard_id, user_id: user.id, rating: log.rating, state: log.state, scheduled_days: log.scheduled_days, due: log.due, review: log.review, stability: log.stability, difficulty: log.difficulty })`. If `insertError`: log `console.error('review_logs insert failed after card update', insertError)` and return 500 (the card state is already updated — the inconsistency is acceptable at MVP scale; see Migration Notes).
+- After successful DB writes, optionally compute preview intervals for the next card. The caller passes the `next_card` row in the request body as an optional field (`next_flashcard_id?: string`). If provided, fetch it, run `scheduler.repeat(TypeConvert.card(nextRow), now)` and include the four `scheduled_days` values in the response. If not provided (last card in session), return `next_intervals: null`.
+- On success: return 200 `{ due: updatedCard.due, state: updatedCard.state, scheduled_days: updatedCard.scheduled_days, next_intervals }` — shape matches `ReviewResponse`
 - Use `console.error` only at genuine error boundaries; no debug `console.log` (per S-01 impl-review F3)
 
 ### Success Criteria
@@ -293,10 +301,11 @@ Install missing shadcn/ui components, build the `useStudySession` hook, the `Stu
 export function useStudySession(initialCards: Flashcard[])
 ```
 
-State managed: `cards` (queue remaining), `currentCard`, `isFlipped` (boolean for card flip), `isSubmitting` (rating in-flight), `submitError`, `sessionDone` (boolean).
+State managed: `cards` (queue remaining), `currentCard`, `currentIntervals` (`{ again, hard, good, easy }` — interval days for the current card's buttons, sourced from the API's `next_intervals` on the previous rating; for the first card, computed via `scheduler.repeat()` from the initial card's FSRS state in the hook initializer), `isFlipped` (boolean for card flip), `isSubmitting` (rating in-flight), `submitError`, `sessionDone` (boolean).
 
 Exposes:
 - `currentCard: Flashcard | undefined`
+- `currentIntervals: { again: number; hard: number; good: number; easy: number } | null` — interval previews for the current card's rating buttons
 - `isFlipped: boolean`
 - `isSubmitting: boolean`
 - `submitError: string | null`
@@ -304,7 +313,7 @@ Exposes:
 - `totalCount: number` — initial queue length
 - `remainingCount: number` — cards not yet rated
 - `flip(): void` — toggle `isFlipped`
-- `rate(rating: 1 | 2 | 3 | 4): Promise<void>` — calls `POST /api/study/review`, advances to next card on success, sets `submitError` on failure. Follow `useCardReview.ts:101-143` for the fetch/error/finally pattern.
+- `rate(rating: 1 | 2 | 3 | 4): Promise<void>` — calls `POST /api/study/review` with `{ flashcard_id, rating, next_flashcard_id: cards[1]?.id }` (the second card in queue is the next), advances to next card on success, updates `currentIntervals` from the API's `next_intervals`, sets `submitError` on failure. Follow `useCardReview.ts:101-143` for the fetch/error/finally pattern.
 
 After a successful rate: remove the rated card from the front of the queue, reset `isFlipped` to `false`. If queue is now empty, set `sessionDone = true`.
 
@@ -325,7 +334,7 @@ Active session layout:
 - `Progress` bar: `value={(totalCount - remainingCount) / totalCount * 100}`, label showing `N of M reviewed`
 - Card surface using `Card` component: shows `currentCard.front` always; shows `currentCard.back` only when `isFlipped === true`
 - "Show answer" `Button` (variant `outline`) — visible when `!isFlipped`, calls `flip()`
-- Four rating `Button`s (Again / Hard / Good / Easy) — visible when `isFlipped`, disabled when `isSubmitting`, each calls `rate(1|2|3|4)`
+- Four rating `Button`s — visible when `isFlipped`, disabled when `isSubmitting`, each calls `rate(1|2|3|4)`. Labels show the rating name and the corresponding interval from `currentIntervals`: e.g. `Again (${currentIntervals?.again ?? '—'}d)`, `Hard (${currentIntervals?.hard ?? '—'}d)`, `Good (${currentIntervals?.good ?? '—'}d)`, `Easy (${currentIntervals?.easy ?? '—'}d)`. Use `'—'` as the fallback when `currentIntervals` is null (first card before any API response).
 - `Badge` showing current card state label: `{ 0: "New", 1: "Learning", 2: "Review", 3: "Relearning" }[currentCard.state]`
 - Error display if `submitError` is set
 
@@ -346,7 +355,7 @@ import { createClient } from "@/lib/supabase";
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 
 let dueCards = [];
-if (supabase && Astro.locals.user) {
+if (supabase) {  // Astro.locals.user is guaranteed non-null by middleware (PROTECTED_ROUTES)
   const { data } = await supabase
     .from("flashcards")
     .select("*")
@@ -461,6 +470,7 @@ The S-02 migration (`20260903000000_srs_schema.sql`) is additive:
 - `UPDATE flashcards SET due = created_at` — updates all existing rows; on a production DB with many rows this could be slow. For MVP scale this is acceptable.
 - `CREATE TABLE review_logs` — net new, no conflict risk.
 - Rollback strategy (if needed): `ALTER TABLE flashcards DROP COLUMN due, DROP COLUMN stability, ...` and `DROP TABLE review_logs`. No existing application code depends on these columns prior to this plan.
+- **Known gap — non-atomic review write**: `POST /api/study/review` updates `flashcards` and inserts into `review_logs` sequentially (no transaction). If the INSERT fails after a successful UPDATE, the card's FSRS state advances but no log is recorded. At MVP scale this window is negligible. If data integrity becomes a concern post-launch, wrap both writes in a `record_review` Postgres RPC.
 
 ## References
 

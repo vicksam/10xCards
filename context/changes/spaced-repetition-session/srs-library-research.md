@@ -57,7 +57,7 @@ const result = scheduler.next(card, new Date(), Rating.Good);
 > **Note:** The README says "Node.js >= 20 required" — this refers to the **dev/build** environment, not the runtime. The library is pure math with no Node I/O and runs fine on Cloudflare Workers. (The project uses Node.js 22.14.0 per `.nvmrc`, so dev environment is fine too.)
 
 **Schema impact (extends F-01 flashcards table):**
-FSRS needs per-card state columns: `stability FLOAT`, `difficulty FLOAT`, `due TIMESTAMPTZ`, `reps INT`, `lapses INT`, `state TEXT` (New/Learning/Review/Relearning), `last_review TIMESTAMPTZ`.
+FSRS needs 10 per-card state columns: `due TIMESTAMPTZ`, `stability FLOAT`, `difficulty FLOAT`, `elapsed_days INT`, `scheduled_days INT`, `learning_steps INT`, `reps INT`, `lapses INT`, `state INT2` (0=New 1=Learning 2=Review 3=Relearning), `last_review TIMESTAMPTZ` (nullable). All 10 fields are stored and restored via `TypeConvert.card()` — see `ts-fsrs-docs.md` for the authoritative Column definitions.
 
 ---
 
