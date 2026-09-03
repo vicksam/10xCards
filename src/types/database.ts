@@ -38,27 +38,57 @@ export type Database = {
         Row: {
           back: string
           created_at: string
+          difficulty: number | null
+          due: string | null
+          elapsed_days: number | null
           front: string
           id: string
+          lapses: number | null
+          last_review: string | null
+          learning_steps: number | null
+          reps: number | null
+          scheduled_days: number | null
           source: Database["public"]["Enums"]["card_source"]
+          stability: number | null
+          state: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
           back: string
           created_at?: string
+          difficulty?: number | null
+          due?: string | null
+          elapsed_days?: number | null
           front: string
           id?: string
+          lapses?: number | null
+          last_review?: string | null
+          learning_steps?: number | null
+          reps?: number | null
+          scheduled_days?: number | null
           source: Database["public"]["Enums"]["card_source"]
+          stability?: number | null
+          state?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
           back?: string
           created_at?: string
+          difficulty?: number | null
+          due?: string | null
+          elapsed_days?: number | null
           front?: string
           id?: string
+          lapses?: number | null
+          last_review?: string | null
+          learning_steps?: number | null
+          reps?: number | null
+          scheduled_days?: number | null
           source?: Database["public"]["Enums"]["card_source"]
+          stability?: number | null
+          state?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -97,16 +127,63 @@ export type Database = {
         }
         Relationships: []
       }
+      review_logs: {
+        Row: {
+          created_at: string
+          difficulty: number
+          due: string
+          flashcard_id: string
+          id: string
+          rating: number
+          review: string
+          scheduled_days: number
+          stability: number
+          state: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          difficulty: number
+          due: string
+          flashcard_id: string
+          id?: string
+          rating: number
+          review: string
+          scheduled_days: number
+          stability: number
+          state: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          difficulty?: number
+          due?: string
+          flashcard_id?: string
+          id?: string
+          rating?: number
+          review?: string
+          scheduled_days?: number
+          stability?: number
+          state?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_logs_flashcard_id_fkey"
+            columns: ["flashcard_id"]
+            isOneToOne: false
+            referencedRelation: "flashcards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       finalize_generation_review: {
-        Args: {
-          cards: Json
-          generation_id: string
-        }
+        Args: { cards: Json; generation_id: string }
         Returns: number
       }
     }

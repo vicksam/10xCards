@@ -492,17 +492,17 @@ The S-02 migration (`20260903000000_srs_schema.sql`) is additive:
 
 #### Automated
 
-- [ ] 1.1 `npx supabase migration up` exits 0 with no errors
-- [ ] 1.2 `npx supabase gen types typescript --local` completes without error
-- [ ] 1.3 `npm run lint` passes with no new errors
-- [ ] 1.4 `npm run build` succeeds
+- [x] 1.1 `npx supabase migration up` exits 0 with no errors
+- [x] 1.2 `npx supabase gen types typescript --local` completes without error
+- [x] 1.3 `npm run lint` passes with no new errors
+- [x] 1.4 `npm run build` succeeds
 
 #### Manual
 
-- [ ] 1.5 Supabase Studio shows `flashcards` with 17 columns including all 10 FSRS fields
-- [ ] 1.6 Supabase Studio shows `review_logs` table with RLS enabled
-- [ ] 1.7 Existing flashcard rows have `due = created_at`
-- [ ] 1.8 New flashcard rows (via RPC) have correct FSRS defaults (`state=0`, `reps=0`, `due≈now`)
+- [x] 1.5 Supabase Studio shows `flashcards` with 17 columns including all 10 FSRS fields
+- [x] 1.6 Supabase Studio shows `review_logs` table with RLS enabled
+- [x] 1.7 Existing flashcard rows have `due = created_at`
+- [x] 1.8 New flashcard rows (via RPC) have correct FSRS defaults (`state=0`, `reps=0`, `due≈now`)
 
 ### Phase 2: API Layer
 
