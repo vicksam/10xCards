@@ -31,7 +31,7 @@ Manual flashcard creation is slow and happens when energy is lowest — after a 
 |---|---|---|---|---|---|
 | F-01 | flashcard-schema | (foundation) Supabase migration pipeline and flashcards table with RLS landed | — | Access Control | done |
 | S-01 | ai-card-generation | paste study text, trigger AI generation, review candidates (accept/edit/reject), and save accepted cards | F-01 | US-01, FR-001, FR-002, FR-003, FR-004 | done |
-| S-02 | spaced-repetition-session | start a spaced repetition study session with scheduling | F-01 | FR-007 | in-progress |
+| S-02 | spaced-repetition-session | start a spaced repetition study session with scheduling | F-01 | FR-007 | done |
 | S-03 | card-management | manually create a flashcard and view, edit, delete saved flashcards | F-01 | FR-005, FR-006 | ready |
 
 ## Baseline
@@ -85,7 +85,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Integrating an SR algorithm (SM-2/FSRS) is low-risk technically (mature libraries exist), but the review-loop UI must be reliable — the guardrail KPI ("Study Session Reliability") gates launch. Scheduling metadata extends the base schema from F-01. Sequenced after S-01 in the speed bias because study sessions require cards in the deck to be meaningful.
-- **Status:** in-progress
+- **Status:** done
 
 ### S-03: Manual card creation and flashcard management
 
@@ -105,7 +105,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 |---|---|---|---|---|
 | F-01 | flashcard-schema | Set up Supabase migrations and flashcards table with RLS | done | — |
 | S-01 | ai-card-generation | AI flashcard generation from pasted text with candidate review | done | North star; plan reviewed, run `/10x-implement ai-card-generation phase 1` |
-| S-02 | spaced-repetition-session | Spaced repetition study session with SR algorithm | yes | Plan reviewed; run `/10x-implement spaced-repetition-session phase 1` |
+| S-02 | spaced-repetition-session | Spaced repetition study session with SR algorithm | done | Archived |
 | S-03 | card-management | Manual card creation and flashcard CRUD | yes | Parallel with S-01 |
 
 ## Open Roadmap Questions
@@ -125,3 +125,4 @@ _None — all product-level decisions were locked during shaping (PRD §Open Que
 
 - **F-01: (foundation) Supabase migration pipeline and flashcards table with RLS landed** — Archived 2026-08-23 → `context/archive/2026-08-23-flashcard-schema/`. Lesson: —.
 - **S-01: AI flashcard generation and candidate review** — Archived 2026-09-02 → `context/archive/2026-09-02-ai-card-generation/`. Lesson: —.
+- **S-02: start a spaced repetition study session using an open-source scheduling algorithm; cards recalled easily appear later, cards recalled with difficulty appear sooner.** — Archived 2026-09-03 → `context/archive/2026-09-02-spaced-repetition-session/`. Lesson: —.
