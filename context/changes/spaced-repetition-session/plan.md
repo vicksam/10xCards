@@ -525,32 +525,32 @@ The S-02 migration (`20260903000000_srs_schema.sql`) is additive:
 
 #### Automated
 
-- [x] 3.1 `npm run lint` passes
-- [x] 3.2 `npm run build` succeeds
-- [x] 3.3 TypeScript type-checks pass
+- [x] 3.1 `npm run lint` passes — f0bbf0e
+- [x] 3.2 `npm run build` succeeds — f0bbf0e
+- [x] 3.3 TypeScript type-checks pass — f0bbf0e
 
 #### Manual
 
-- [x] 3.4 `/study` while signed out redirects to `/auth/signin`
-- [x] 3.5 `/study` with due cards shows progress bar and first card front
-- [x] 3.6 "Show answer" reveals card back
-- [x] 3.7 Rating a card advances to the next, resets flip state
-- [x] 3.8 Rating all cards shows completion screen with dashboard link
-- [x] 3.9 No due cards → empty state with dashboard link
-- [x] 3.10 Topbar shows "Study" link for signed-in users
+- [x] 3.4 `/study` while signed out redirects to `/auth/signin` — f0bbf0e
+- [x] 3.5 `/study` with due cards shows progress bar and first card front — f0bbf0e
+- [x] 3.6 "Show answer" reveals card back — f0bbf0e
+- [x] 3.7 Rating a card advances to the next, resets flip state — f0bbf0e
+- [x] 3.8 Rating all cards shows completion screen with dashboard link — f0bbf0e
+- [x] 3.9 No due cards → empty state with dashboard link — f0bbf0e
+- [x] 3.10 Topbar shows "Study" link for signed-in users — f0bbf0e
 
 ### Phase 4: Verification
 
 #### Automated
 
-- [ ] 4.1 `npm run lint` passes (full repo, no regressions)
-- [ ] 4.2 `npm run build` succeeds
+- [x] 4.1 `npm run lint` passes (full repo, no regressions)
+- [x] 4.2 `npm run build` succeeds
 
 #### Manual
 
-- [ ] 4.3 Full session smoke test: flip → rate → DB updated → review_logs row created
-- [ ] 4.4 New AI-generated cards appear in study queue with `state=0` and `due ≤ now`
-- [ ] 4.5 After rating all cards, re-visiting `/study` shows empty state
-- [ ] 4.6 Existing card backfill confirmed: `due = created_at`
-- [ ] 4.7 `finalize_generation_review` RPC produces correct FSRS defaults on new rows
-- [ ] 4.8 Local Supabase stopped after testing (`npx supabase stop`)
+- [x] 4.3 Full session smoke test: flip → rate → DB updated → review_logs row created
+- [x] 4.4 New AI-generated cards appear in study queue with `state=0` and `due ≤ now`
+- [x] 4.5 After rating all cards, re-visiting `/study` shows empty state
+- [x] 4.6 Existing card backfill confirmed: `due = created_at`
+- [x] 4.7 `finalize_generation_review` RPC produces correct FSRS defaults on new rows
+- [x] 4.8 Local Supabase stopped after testing (`npx supabase stop`)
