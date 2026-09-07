@@ -2,7 +2,6 @@
 name: 10x-plan
 description: Create detailed implementation plans with thorough research and iteration
 ---
-```
 
 # Implementation Plan
 
@@ -83,12 +82,12 @@ Before any reading, identify what kinds of upstream artifacts the user passed in
    - Related implementation plans
    - Any JSON/data files mentioned
    - `context/foundation/lessons.md` if present — treat its rules as priors when probing scope, edge cases, and architecture choices; rules already accepted by the team narrow which design pitfalls still need fresh questioning.
-   - **IMPORTANT**: Read files without limit/offset parameters to read entire files
+   - **IMPORTANT**: Use the Read tool WITHOUT limit/offset parameters to read entire files
    - **CRITICAL**: DO NOT spawn sub-tasks before reading these files yourself in the main context
    - **NEVER** read files partially - if a file is mentioned, read it completely
 
 2. **Spawn initial research tasks to gather context** (skip or narrow based on Step 1.0):
-   Before asking the user any questions, use the AI assistant's task management features with parallel sub-agents to research:
+   Before asking the user any questions, use the Task tool with parallel sub-agents to research:
    - **Explore agent** (`subagent_type: "Explore"`) — find all files related to the task, search for patterns, trace code paths. Use for file discovery and codebase structure questions.
    - **general-purpose agent** (`subagent_type: "general-purpose"`) — for deeper analysis that may require reading many files and synthesizing findings. Use for understanding complex systems.
 
@@ -109,6 +108,7 @@ Before any reading, identify what kinds of upstream artifacts the user passed in
    - Identify any discrepancies or misunderstandings
    - Note assumptions that need verification
    - Determine true scope based on codebase reality
+   - **Run a smallest-counterexample pass before choosing interview questions.** For ordered selections, place equal comparison values across the cutoff; for counted sets, vary the identity/equivalence rule; for state thresholds, vary inclusivity and governing clock. Ask every case that yields different user-visible outcomes in the first round. Existing behaviour supplies one option, not the answer.
 
 5. **Present informed understanding and assess complexity**:
 
@@ -170,7 +170,7 @@ Before any reading, identify what kinds of upstream artifacts the user passed in
      `[1-sentence what this does] · Strength: [key advantage] · Tradeoff: [key cost or risk]`
    - The recommendation should be grounded in research (codebase patterns for software, domain knowledge and context for non-software) — not guessing
 
-   **Example question with recommendations (software):** `Conflicts` is `[S]` — solution architecture; always asked even when a frame defined the problem.
+   **Example of asking a question with recommendations (software):** `Conflicts` is `[S]` — solution architecture; always asked even when a frame defined the problem.
 
    Ask the user: "How should the system handle conflicts when two users edit simultaneously?"
    Options:
@@ -178,7 +178,7 @@ Before any reading, identify what kinds of upstream artifacts the user passed in
    - "⭐ Recommended: Notify and merge" (Show conflict to user, let them choose which version to keep. · Strength: Prevents data loss while keeping UX simple — matches the pattern in existing EditPanel component. · Tradeoff: Adds a conflict resolution modal and WebSocket subscription for real-time detection.)
    - "Lock-based" (First editor locks the resource; others see read-only until released. · Strength: Prevents conflicts entirely — simplest mental model for users. · Tradeoff: Stale locks require TTL + cleanup logic; blocks legitimate concurrent work.)
 
-   **Example question with recommendations (non-software — content/strategy):** `Depth` is `[D]` — diagnostic about audience/scope; skip if a frame brief already settled who this is for.
+   **Example of asking a question with recommendations (non-software — content/strategy):** `Depth` is `[D]` — diagnostic about audience/scope; skip if a frame brief already settled who this is for.
 
    Ask the user: "What depth of technical detail should the course module target?"
    Options:
@@ -276,7 +276,7 @@ After getting initial clarifications from the user, NOW is when you address the 
    - Read the specific files/directories they mention
    - Only proceed once you've verified the facts yourself
 
-3. **Create research tasks** using your AI coding assistant's task creation feature to track exploration (these appear in the user's status bar). Update them via your AI coding assistant's task update feature as research completes.
+3. **Create research tasks** using TaskCreate to track exploration (these appear in the user's status bar). Update them via TaskUpdate as research completes.
 
 4. **Spawn parallel sub-tasks for comprehensive research**:
    - Create multiple Task agents to research different aspects concurrently
@@ -629,13 +629,13 @@ For non-software: structure, workflow, key dependencies.]
 
 Do this in Step 4 (right after the `change.md` → `planned` stamp). The lookup is **mandatory**; "best effort" scopes only the *edits* — a missing roadmap or a not-found target is skipped silently and never blocks, prompts, or aborts the run. Do not skip the check on the assumption there's no roadmap.
 
-1. Check if `context/foundation/roadmap.md` exists. If absent, skip this step silently.
+1. `test -f context/foundation/roadmap.md`. If absent, skip this step silently.
 2. Read the file. Look for `<change-id>` used as a `Change ID`:
    - in the `## At a glance` table — the row whose **Change ID** column cell equals `<change-id>` exactly;
    - and in the `## Foundations` / `## Slices` bodies — the `### <ID>: …` block that contains a `- **Change ID:** <change-id>` line.
 
    Match is exact-string only. **No match** → print `ℹ context/foundation/roadmap.md has no item with Change ID "<change-id>" — roadmap left untouched.` and stop here.
-3. **Match found** → if the item's `- **Status:**` is already `planning`, `in-progress`, or `done`, leave it untouched (**forward-only**: never regress a more-advanced status) and stop. Otherwise apply both edits with a file editing tool — each independent and best effort; skip a sub-edit whose target isn't where the `/10x-roadmap` template puts it, and note the skip. Touch only the `Status` field:
+3. **Match found** → if the item's `- **Status:**` is already `planning`, `in-progress`, or `done`, leave it untouched (**forward-only**: never regress a more-advanced status) and stop. Otherwise apply both edits with the Edit tool — each independent and best effort; skip a sub-edit whose target isn't where the `/10x-roadmap` template puts it, and note the skip. Touch only the `Status` field:
    1. **`## At a glance`** — set the matched row's **Status** cell to `planning`.
    2. **Item body** — rewrite the item's `- **Status:**` line to `- **Status:** planning`.
 
@@ -669,7 +669,7 @@ Do this in Step 4 (right after the `change.md` → `planned` stamp). The lookup 
    - Include "what we're NOT doing"
 
 5. **Track Progress**:
-   - Use your AI coding assistant's task creation feature to create planning tasks and its task update feature to mark them completed as you progress
+   - Use TaskCreate to create planning tasks and TaskUpdate to mark them completed as you progress
    - Tasks appear in the user's status bar for visibility
    - Mark tasks completed as you finish research areas
 
@@ -701,8 +701,8 @@ Do this in Step 4 (right after the `change.md` → `planned` stamp). The lookup 
 
 **Always separate success criteria into two categories:**
 
-11. **Automated Verification** — commands agents can run: `make test`, `npm run lint`, type checks, specific file existence
-12. **Manual Verification** — human testing: UI/UX, real-world performance, edge cases, user acceptance
+1. **Automated Verification** — commands agents can run: `make test`, `npm run lint`, type checks, specific file existence
+2. **Manual Verification** — human testing: UI/UX, real-world performance, edge cases, user acceptance
 
 Each phase's success criteria should use `- [ ]` checkboxes under `#### Automated Verification:` and `#### Manual Verification:` headings.
 
@@ -734,7 +734,7 @@ Planning can be context-heavy due to research + iteration. Keep context efficien
   ```
   This lets `/10x-plan` reload the draft and continue iterating with full context available.
 
-## Example Question Probing by Feature Type
+## Example Probing by Feature Type
 
 ### Example 1: Software / UI Feature — MEDIUM complexity (e.g., Pagination)
 
