@@ -46,7 +46,7 @@ We will build standard React components wrapping shadcn/ui components (`table`, 
 ## Implementation Phases
 
 ### Phase 1: API Endpoints (CRUD)
-- Add `GET` export to `src/pages/api/flashcards/index.ts` to fetch user's flashcards.
+- Add `GET` export to `src/pages/api/flashcards/index.ts` to fetch user's flashcards. The endpoint must accept `page` and `limit` query parameters and return a `{ data, count }` object to support pagination.
 - Create `src/pages/api/flashcards/manual.ts` with a `POST` export for manual card creation.
 - Create `src/pages/api/flashcards/[id].ts` with `PUT` and `DELETE` exports.
 
