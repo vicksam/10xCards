@@ -3,7 +3,7 @@ project: "10xCards"
 version: 1
 status: draft
 created: 2026-08-22
-updated: 2026-09-03
+updated: 2026-09-07
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -33,6 +33,7 @@ Manual flashcard creation is slow and happens when energy is lowest — after a 
 | S-01 | ai-card-generation | paste study text, trigger AI generation, review candidates (accept/edit/reject), and save accepted cards | F-01 | US-01, FR-001, FR-002, FR-003, FR-004 | done |
 | S-02 | spaced-repetition-session | start a spaced repetition study session with scheduling | F-01 | FR-007 | done |
 | S-03 | card-management | manually create a flashcard and view, edit, delete saved flashcards | F-01 | FR-005, FR-006 | ready |
+| S-04 | ux-improvements | experience progressive load timeouts, reset a review session, and cancel card generation (stopping stat + db writes) | F-01 | NFR (30 s generation) | planned |
 
 ## Baseline
 
@@ -99,6 +100,18 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Risk:** Low implementation risk (standard CRUD). Manual creation is the safety valve for AI generation failures. Sequenced last because it is off the critical retention loop (generate → study) and does not block other slices.
 - **Status:** ready
 
+### S-04: UX improvements
+
+- **Outcome:** user experiences progressive generation timeouts (30 s → 45 s → 60 s on successive fallback/manual retries), can reset a review session mid-session, and can cancel card generation at any time — cancellation halts all ongoing stat and database writes.
+- **Change ID:** ux-improvements
+- **PRD refs:** NFR (candidate cards within 30 s under normal conditions)
+- **Prerequisites:** F-01
+- **Parallel with:** S-03
+- **Blockers:** —
+- **Unknowns:** —
+- **Risk:** Timeout progression and cancel-with-abort require tight coordination between UI state, API fetch lifecycle, and the DB write path introduced in S-01. Must not regress the S-01 generation flow or S-02 session reliability KPI.
+- **Status:** planning
+
 ## Backlog Handoff
 
 | Roadmap ID | Change ID | Suggested issue title | Ready for `/10x-plan` | Notes |
@@ -107,6 +120,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-01 | ai-card-generation | AI flashcard generation from pasted text with candidate review | done | North star; plan reviewed, run `/10x-implement ai-card-generation phase 1` |
 | S-02 | spaced-repetition-session | Spaced repetition study session with SR algorithm | done | Archived |
 | S-03 | card-management | Manual card creation and flashcard CRUD | yes | Parallel with S-01 |
+| S-04 | ux-improvements | Progressive generation timeouts, session reset, cancel generation | planning | Parallel with S-03 |
 
 ## Open Roadmap Questions
 
