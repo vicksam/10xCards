@@ -3,7 +3,7 @@ project: "10xCards"
 version: 1
 status: draft
 created: 2026-08-22
-updated: 2026-09-07
+updated: 2026-09-08
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -33,7 +33,7 @@ Manual flashcard creation is slow and happens when energy is lowest — after a 
 | S-01 | ai-card-generation | paste study text, trigger AI generation, review candidates (accept/edit/reject), and save accepted cards | F-01 | US-01, FR-001, FR-002, FR-003, FR-004 | done |
 | S-02 | spaced-repetition-session | start a spaced repetition study session with scheduling | F-01 | FR-007 | done |
 | S-03 | card-management | manually create a flashcard and view, edit, delete saved flashcards | F-01 | FR-005, FR-006 | planning |
-| S-04 | ux-improvements | experience progressive load timeouts, reset a review session, and cancel card generation (stopping stat + db writes) | F-01 | NFR (30 s generation) | planned |
+| S-04 | ux-improvements | experience progressive load timeouts, reset a review session, and cancel card generation (stopping stat + db writes) | F-01 | NFR (30 s generation) | in-progress |
 
 ## Baseline
 
@@ -110,7 +110,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Timeout progression and cancel-with-abort require tight coordination between UI state, API fetch lifecycle, and the DB write path introduced in S-01. Must not regress the S-01 generation flow or S-02 session reliability KPI.
-- **Status:** planning
+- **Status:** in-progress
 
 ## Backlog Handoff
 
@@ -120,7 +120,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-01 | ai-card-generation | AI flashcard generation from pasted text with candidate review | done | North star; plan reviewed, run `/10x-implement ai-card-generation phase 1` |
 | S-02 | spaced-repetition-session | Spaced repetition study session with SR algorithm | done | Archived |
 | S-03 | card-management | Manual card creation and flashcard CRUD | yes | Parallel with S-01 |
-| S-04 | ux-improvements | Progressive generation timeouts, session reset, cancel generation | planning | Parallel with S-03 |
+| S-04 | ux-improvements | Progressive generation timeouts, session reset, cancel generation | in-progress | Parallel with S-03 |
 
 ## Open Roadmap Questions
 

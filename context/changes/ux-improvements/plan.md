@@ -208,12 +208,12 @@ Allow continuous studying without returning to the dashboard by offering a full 
 
 #### Automated
 
-- [ ] 1.1 Migration applies cleanly: npx supabase migration up
-- [ ] 1.2 Type generation passes: npx supabase gen types typescript --local
+- [x] 1.1 Migration applies cleanly: npx supabase migration up
+- [x] 1.2 Type generation passes: npx supabase gen types typescript --local
 
 #### Manual
 
-- [ ] 1.3 Endpoint respects RLS
+- [x] 1.3 Endpoint respects RLS
 
 ### Phase 2: Progressive Timeouts & Hook Refactor
 
