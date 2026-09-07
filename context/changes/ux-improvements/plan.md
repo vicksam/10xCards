@@ -68,12 +68,12 @@ CREATE POLICY "Users can delete their own unfinalized generation reviews"
 
 #### Automated Verification:
 
-- [ ] 1.1 Migration applies cleanly: `npx supabase migration up`
-- [ ] 1.2 Type generation passes: `npx supabase gen types typescript --local`
+- 1.1 Migration applies cleanly: `npx supabase migration up`
+- 1.2 Type generation passes: `npx supabase gen types typescript --local`
 
 #### Manual Verification:
 
-- [ ] 1.3 Endpoint respects RLS (cannot delete finalized rows or other users' rows).
+- 1.3 Endpoint respects RLS (cannot delete finalized rows or other users' rows).
 
 ---
 
@@ -108,12 +108,12 @@ Implement escalating timeouts and propagate them to the server SDK, allowing lon
 
 #### Automated Verification:
 
-- [ ] 2.1 TypeScript type checks pass: `npx tsc --noEmit`
-- [ ] 2.2 ESLint passes: `npm run lint`
+- 2.1 TypeScript type checks pass: `npx tsc --noEmit`
+- 2.2 ESLint passes: `npm run lint`
 
 #### Manual Verification:
 
-- [ ] 2.3 Simulated slow generation aborts at 30s, silent retries for 45s, and manual retry allows 60s.
+- 2.3 Simulated slow generation aborts at 30s, silent retries for 45s, and manual retry allows 60s.
 
 ---
 
@@ -137,12 +137,12 @@ Place a "Cancel generation" button consistently during the generation loading an
 
 #### Automated Verification:
 
-- [ ] 3.1 Build succeeds: `npm run build`
+- 3.1 Build succeeds: `npm run build`
 
 #### Manual Verification:
 
-- [ ] 3.2 Clicking cancel during loading resets UI and no database row is created.
-- [ ] 3.3 Clicking cancel during review resets UI and deletes the unfinalized database row.
+- 3.2 Clicking cancel during loading resets UI and no database row is created.
+- 3.3 Clicking cancel during review resets UI and deletes the unfinalized database row.
 
 ---
 
@@ -166,11 +166,11 @@ Allow continuous studying without returning to the dashboard by offering a full 
 
 #### Automated Verification:
 
-- [ ] 4.1 Build succeeds: `npm run build`
+- 4.1 Build succeeds: `npm run build`
 
 #### Manual Verification:
 
-- [ ] 4.2 Clicking "Study more cards" reloads the page and presents the next batch of cards (or empty state if none are due).
+- 4.2 Clicking "Study more cards" reloads the page and presents the next batch of cards (or empty state if none are due).
 
 ---
 

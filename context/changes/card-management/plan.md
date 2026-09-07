@@ -51,22 +51,22 @@ We will build standard React components wrapping shadcn/ui components (`table`, 
 - Create `src/pages/api/flashcards/[id].ts` with `PUT` and `DELETE` exports.
 
 #### Automated Verification:
-- [ ] TypeScript compiler passes without errors on new API routes.
+- TypeScript compiler passes without errors on new API routes.
 
 #### Manual Verification:
-- [ ] `GET /api/flashcards` returns JSON array of flashcards for the logged-in user.
-- [ ] `POST /api/flashcards/manual` creates a card in DB with source 'manual'.
-- [ ] `PUT` and `DELETE` appropriately update and remove a specific card.
+- `GET /api/flashcards` returns JSON array of flashcards for the logged-in user.
+- `POST /api/flashcards/manual` creates a card in DB with source 'manual'.
+- `PUT` and `DELETE` appropriately update and remove a specific card.
 
 ### Phase 2: UI Components Setup
 - Run `npx shadcn@latest add table dialog input textarea dropdown-menu label`.
 - Verify styling and correct imports.
 
 #### Automated Verification:
-- [ ] `npm run lint` passes on newly generated component files.
+- `npm run lint` passes on newly generated component files.
 
 #### Manual Verification:
-- [ ] UI components render correctly in a test route without throwing React errors.
+- UI components render correctly in a test route without throwing React errors.
 
 ### Phase 3: Card Management Page & Navigation
 - Create `src/components/CardManager.tsx` with a basic data table structure and data fetching logic.
@@ -74,11 +74,11 @@ We will build standard React components wrapping shadcn/ui components (`table`, 
 - Update `src/components/Topbar.astro` to include a link to `/cards`.
 
 #### Automated Verification:
-- [ ] Build succeeds with new page included.
+- Build succeeds with new page included.
 
 #### Manual Verification:
-- [ ] Topbar displays the "My Cards" link and correctly navigates to the page.
-- [ ] Table displays mock data or actual DB data correctly formatting Front, Back, Source, and Due.
+- Topbar displays the "My Cards" link and correctly navigates to the page.
+- Table displays mock data or actual DB data correctly formatting Front, Back, Source, and Due.
 
 ### Phase 4: Create & Edit Modals
 - Add a "Create Card" button triggering a modal form in `CardManager.tsx`.
@@ -86,11 +86,11 @@ We will build standard React components wrapping shadcn/ui components (`table`, 
 - Wire both modals to the API with loading states.
 
 #### Automated Verification:
-- [ ] TS checks pass for form state and handlers.
+- TS checks pass for form state and handlers.
 
 #### Manual Verification:
-- [ ] Clicking "Create Card" opens a clean modal. Submitting creates a card and updates the table.
-- [ ] Clicking "Edit" on a card row opens a modal with existing text. Submitting updates the card and the table.
+- Clicking "Create Card" opens a clean modal. Submitting creates a card and updates the table.
+- Clicking "Edit" on a card row opens a modal with existing text. Submitting updates the card and the table.
 
 ### Phase 5: Delete Functionality
 - Add a "Delete" action to table rows.
@@ -98,11 +98,11 @@ We will build standard React components wrapping shadcn/ui components (`table`, 
 - Ensure the table refreshes optimistically or via re-fetch.
 
 #### Automated Verification:
-- [ ] TS checks pass on the delete handler.
+- TS checks pass on the delete handler.
 
 #### Manual Verification:
-- [ ] Clicking "Delete" prompts for confirmation.
-- [ ] After confirming, the card is removed from the database and the table updates.
+- Clicking "Delete" prompts for confirmation.
+- After confirming, the card is removed from the database and the table updates.
 
 ## Progress
 
