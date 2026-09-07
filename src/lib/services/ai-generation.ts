@@ -39,7 +39,7 @@ function cleanJsonString(content: string): string {
 const openai = new OpenAI({
   apiKey: OPENROUTER_API_KEY,
   baseURL: "https://openrouter.ai/api/v1",
-  timeout: 25_000,
+  timeout: 65_000,
   maxRetries: 0,
   defaultHeaders: {
     "HTTP-Referer": "https://10xcards.app",
@@ -47,22 +47,25 @@ const openai = new OpenAI({
   },
 });
 
-export async function generateFlashcards(text: string): Promise<CandidateCard[]> {
+export async function generateFlashcards(text: string, signal?: AbortSignal): Promise<CandidateCard[]> {
   if (!OPENROUTER_API_KEY) {
     throw new Error("OPENROUTER_API_KEY is not configured");
   }
 
-  const completion = await openai.chat.completions.create({
-    // Gemini 2.5 Flash: supports JSON mode via OpenRouter, better cost/latency than gpt-4o-mini
-    model: "google/gemini-2.5-flash",
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: text },
-    ],
-    temperature: 0.2,
-    max_tokens: 2500,
-    response_format: { type: "json_object" },
-  });
+  const completion = await openai.chat.completions.create(
+    {
+      // Gemini 2.5 Flash: supports JSON mode via OpenRouter, better cost/latency than gpt-4o-mini
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: text },
+      ],
+      temperature: 0.2,
+      max_tokens: 2500,
+      response_format: { type: "json_object" },
+    },
+    { signal },
+  );
 
   const content = completion.choices[0]?.message?.content;
   if (!content?.trim()) {

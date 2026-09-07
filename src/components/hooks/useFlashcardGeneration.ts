@@ -5,7 +5,7 @@ export type GenerationState =
   | { status: "idle" }
   | { status: "loading" }
   | { status: "success"; generationId: string | null; candidates: CandidateCard[] }
-  | { status: "error"; message: string };
+  | { status: "error"; message: string; lastAttemptTimeout?: number };
 
 function isRetryableStatus(status: number): boolean {
   return status === 408 || status === 429 || (status >= 500 && status <= 599);
@@ -13,117 +13,194 @@ function isRetryableStatus(status: number): boolean {
 
 export function useFlashcardGeneration() {
   const [state, setState] = useState<GenerationState>({ status: "idle" });
+  const [lastAttemptTimeout, setLastAttemptTimeout] = useState<number | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const reset = useCallback(() => {
     if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
+      abortControllerRef.current.abort("CANCEL");
       abortControllerRef.current = null;
     }
     setState({ status: "idle" });
+    setLastAttemptTimeout(null);
   }, []);
 
-  const generate = useCallback(async (text: string) => {
-    // Abort any previous pending user request
+  const cancel = useCallback(async (generationId?: string) => {
     if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
+      abortControllerRef.current.abort("CANCEL");
       abortControllerRef.current = null;
     }
-
-    setState({ status: "loading" });
-
-    const parseError = async (res: Response): Promise<string> => {
+    if (generationId) {
       try {
-        const body = (await res.json()) as { error?: string };
-        if (body.error) return body.error;
-      } catch {
-        // Not JSON
-      }
-      return `Request failed with status ${res.status}`;
-    };
-
-    const executeAttempt = async (): Promise<GenerateResponse> => {
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-      const timeoutId = setTimeout(() => {
-        controller.abort("TIMEOUT");
-      }, 35_000);
-
-      try {
-        const response = await fetch("/api/flashcards/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
-          signal: controller.signal,
+        await fetch(`/api/flashcards/generation/${generationId}`, {
+          method: "DELETE",
         });
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("[useFlashcardGeneration] Error deleting unfinalized generation:", err);
+      }
+    }
+    setState({ status: "idle" });
+    setLastAttemptTimeout(null);
+  }, []);
 
-        if (!response.ok) {
-          const message = await parseError(response);
-          const error = new Error(message) as Error & { status: number };
-          error.status = response.status;
-          throw error;
+  const generate = useCallback(
+    async (text: string, manualRetry?: boolean) => {
+      // Abort any previous pending user request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort("CANCEL");
+        abortControllerRef.current = null;
+      }
+
+      const isManual = manualRetry ?? (state.status === "error");
+      setState({ status: "loading" });
+
+      const parseError = async (res: Response): Promise<string> => {
+        try {
+          const body = (await res.json()) as { error?: string };
+          if (body.error) return body.error;
+        } catch {
+          // Not JSON
         }
+        return `Request failed with status ${res.status}`;
+      };
 
-        const data = (await response.json()) as GenerateResponse;
-        return data;
-      } finally {
-        clearTimeout(timeoutId);
+      const executeAttempt = async (timeoutMs: number): Promise<GenerateResponse> => {
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+        const timeoutId = setTimeout(() => {
+          controller.abort("TIMEOUT");
+        }, timeoutMs);
+
+        try {
+          const response = await fetch("/api/flashcards/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+            signal: controller.signal,
+          });
+
+          if (!response.ok) {
+            const message = await parseError(response);
+            const error = new Error(message) as Error & { status: number };
+            error.status = response.status;
+            throw error;
+          }
+
+          const data = (await response.json()) as GenerateResponse;
+          return data;
+        } finally {
+          clearTimeout(timeoutId);
+        }
+      };
+
+      // Manual retry: 60s timeout
+      if (isManual) {
+        try {
+          const data = await executeAttempt(60_000);
+          abortControllerRef.current = null;
+          setLastAttemptTimeout(null);
+          setState({
+            status: "success",
+            generationId: data.generationId,
+            candidates: data.candidates,
+          });
+          return;
+        } catch (err) {
+          if (abortControllerRef.current?.signal.reason === "CANCEL" || err === "CANCEL") {
+            return;
+          }
+          abortControllerRef.current = null;
+          const isAbort =
+            (err instanceof DOMException && err.name === "AbortError") ||
+            err === "TIMEOUT" ||
+            (err instanceof Error && err.name === "AbortError");
+          setLastAttemptTimeout(60);
+          setState({
+            status: "error",
+            message: isAbort
+              ? "Request timed out after 60 seconds"
+              : err instanceof Error
+                ? err.message
+                : "Generation failed",
+            lastAttemptTimeout: 60,
+          });
+          return;
+        }
       }
-    };
 
-    // Attempt 1
-    try {
-      const data = await executeAttempt();
-      abortControllerRef.current = null;
-      setState({
-        status: "success",
-        generationId: data.generationId,
-        candidates: data.candidates,
-      });
-      return;
-    } catch (err) {
-      const isAbort = (err instanceof DOMException && err.name === "AbortError") || err === "TIMEOUT";
-      const status = typeof err === "object" && err && "status" in err ? (err as { status: number }).status : 0;
-      const isRetryable = isRetryableStatus(status) || (!isAbort && status === 0);
-
-      if (!isRetryable) {
-        abortControllerRef.current = null;
-        setState({
-          status: "error",
-          message: isAbort
-            ? "Request timed out after 35 seconds"
-            : err instanceof Error
-              ? err.message
-              : "Generation failed",
-        });
-        return;
-      }
-
-      // Attempt 2 (silent retry on network / 5xx error)
+      // Attempt 1: 30s timeout
       try {
-        const retryData = await executeAttempt();
+        const data = await executeAttempt(30_000);
         abortControllerRef.current = null;
+        setLastAttemptTimeout(null);
         setState({
           status: "success",
-          generationId: retryData.generationId,
-          candidates: retryData.candidates,
+          generationId: data.generationId,
+          candidates: data.candidates,
         });
         return;
-      } catch (retryErr) {
-        abortControllerRef.current = null;
-        const isRetryAbort =
-          (retryErr instanceof DOMException && retryErr.name === "AbortError") || retryErr === "TIMEOUT";
-        setState({
-          status: "error",
-          message: isRetryAbort
-            ? "Request timed out after 35 seconds"
-            : retryErr instanceof Error
-              ? retryErr.message
-              : "Network error. Please try again.",
-        });
-      }
-    }
-  }, []);
+      } catch (err) {
+        if (abortControllerRef.current?.signal.reason === "CANCEL" || err === "CANCEL") {
+          return;
+        }
+        const isAbort =
+          (err instanceof DOMException && err.name === "AbortError") ||
+          err === "TIMEOUT" ||
+          (err instanceof Error && err.name === "AbortError");
+        const status = typeof err === "object" && err && "status" in err ? (err as { status: number }).status : 0;
+        const isRetryable = isAbort || isRetryableStatus(status) || status === 0;
 
-  return { state, generate, reset };
+        if (!isRetryable) {
+          abortControllerRef.current = null;
+          setLastAttemptTimeout(30);
+          setState({
+            status: "error",
+            message: isAbort
+              ? "Request timed out after 30 seconds"
+              : err instanceof Error
+                ? err.message
+                : "Generation failed",
+            lastAttemptTimeout: 30,
+          });
+          return;
+        }
+
+        // Attempt 2: Silent retry with 45s timeout
+        try {
+          const retryData = await executeAttempt(45_000);
+          abortControllerRef.current = null;
+          setLastAttemptTimeout(null);
+          setState({
+            status: "success",
+            generationId: retryData.generationId,
+            candidates: retryData.candidates,
+          });
+          return;
+        } catch (retryErr) {
+          if (abortControllerRef.current?.signal.reason === "CANCEL" || retryErr === "CANCEL") {
+            return;
+          }
+          abortControllerRef.current = null;
+          const isRetryAbort =
+            (retryErr instanceof DOMException && retryErr.name === "AbortError") ||
+            retryErr === "TIMEOUT" ||
+            (retryErr instanceof Error && retryErr.name === "AbortError");
+          setLastAttemptTimeout(45);
+          setState({
+            status: "error",
+            message: isRetryAbort
+              ? "Request timed out after 45 seconds"
+              : retryErr instanceof Error
+                ? retryErr.message
+                : "Network error. Please try again.",
+            lastAttemptTimeout: 45,
+          });
+        }
+      }
+    },
+    [state.status],
+  );
+
+  return { state, generate, reset, cancel, lastAttemptTimeout };
 }

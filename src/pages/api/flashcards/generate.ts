@@ -39,7 +39,11 @@ export const POST: APIRoute = async (context) => {
   // 5. Generate flashcards
   // NFR: study text must not be logged or persisted
   try {
-    const candidates = await generateFlashcards(result.data.text);
+    const candidates = await generateFlashcards(result.data.text, context.request.signal);
+
+    if (context.request.signal.aborted) {
+      return new Response(null, { status: 499 });
+    }
 
     if (candidates.length === 0) {
       const emptyResponse: GenerateResponse = {
@@ -71,6 +75,13 @@ export const POST: APIRoute = async (context) => {
 
     return Response.json(response, { status: 200 });
   } catch (error) {
+    if (
+      context.request.signal.aborted ||
+      (error instanceof Error && (error.name === "AbortError" || error.name === "APIUserAbortError"))
+    ) {
+      return new Response(null, { status: 499 });
+    }
+
     // eslint-disable-next-line no-console
     console.error("[api/generate] Error in generation:", error);
     return Response.json(

@@ -208,23 +208,23 @@ Allow continuous studying without returning to the dashboard by offering a full 
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: npx supabase migration up
-- [x] 1.2 Type generation passes: npx supabase gen types typescript --local
+- [x] 1.1 Migration applies cleanly: npx supabase migration up — 1b6dc27
+- [x] 1.2 Type generation passes: npx supabase gen types typescript --local — 1b6dc27
 
 #### Manual
 
-- [x] 1.3 Endpoint respects RLS
+- [x] 1.3 Endpoint respects RLS — 1b6dc27
 
 ### Phase 2: Progressive Timeouts & Hook Refactor
 
 #### Automated
 
-- [ ] 2.1 TypeScript type checks pass: npx tsc --noEmit
-- [ ] 2.2 ESLint passes: npm run lint
+- [x] 2.1 TypeScript type checks pass: npx tsc --noEmit
+- [x] 2.2 ESLint passes: npm run lint
 
 #### Manual
 
-- [ ] 2.3 Simulated slow generation escalates timeouts properly
+- [x] 2.3 Simulated slow generation escalates timeouts properly
 
 ### Phase 3: Cancel UI
 
