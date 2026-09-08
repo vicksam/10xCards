@@ -11,6 +11,16 @@ function isRetryableStatus(status: number): boolean {
   return status === 408 || status === 429 || (status >= 500 && status <= 599);
 }
 
+function isAbortReasonCancel(controller: AbortController | null, err: unknown): boolean {
+  if (err === "CANCEL") return true;
+  if (!controller) return false;
+  const signal: unknown = controller.signal;
+  if (typeof signal === "object" && signal !== null && "reason" in signal) {
+    return signal.reason === "CANCEL";
+  }
+  return false;
+}
+
 export function useFlashcardGeneration() {
   const [state, setState] = useState<GenerationState>({ status: "idle" });
   const [lastAttemptTimeout, setLastAttemptTimeout] = useState<number | null>(null);
@@ -28,7 +38,6 @@ export function useFlashcardGeneration() {
   const cancel = useCallback(async (generationId?: string) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort("CANCEL");
-      abortControllerRef.current = null;
     }
     if (generationId) {
       try {
@@ -52,7 +61,7 @@ export function useFlashcardGeneration() {
         abortControllerRef.current = null;
       }
 
-      const isManual = manualRetry ?? (state.status === "error");
+      const isManual = manualRetry ?? state.status === "error";
       setState({ status: "loading" });
 
       const parseError = async (res: Response): Promise<string> => {
@@ -107,7 +116,8 @@ export function useFlashcardGeneration() {
           });
           return;
         } catch (err) {
-          if (abortControllerRef.current?.signal.reason === "CANCEL" || err === "CANCEL") {
+          if (isAbortReasonCancel(abortControllerRef.current, err)) {
+            abortControllerRef.current = null;
             return;
           }
           abortControllerRef.current = null;
@@ -141,7 +151,8 @@ export function useFlashcardGeneration() {
         });
         return;
       } catch (err) {
-        if (abortControllerRef.current?.signal.reason === "CANCEL" || err === "CANCEL") {
+        if (isAbortReasonCancel(abortControllerRef.current, err)) {
+          abortControllerRef.current = null;
           return;
         }
         const isAbort =
@@ -156,11 +167,7 @@ export function useFlashcardGeneration() {
           setLastAttemptTimeout(30);
           setState({
             status: "error",
-            message: isAbort
-              ? "Request timed out after 30 seconds"
-              : err instanceof Error
-                ? err.message
-                : "Generation failed",
+            message: err instanceof Error ? err.message : "Generation failed",
             lastAttemptTimeout: 30,
           });
           return;
@@ -178,7 +185,8 @@ export function useFlashcardGeneration() {
           });
           return;
         } catch (retryErr) {
-          if (abortControllerRef.current?.signal.reason === "CANCEL" || retryErr === "CANCEL") {
+          if (isAbortReasonCancel(abortControllerRef.current, retryErr)) {
+            abortControllerRef.current = null;
             return;
           }
           abortControllerRef.current = null;

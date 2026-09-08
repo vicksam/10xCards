@@ -39,7 +39,11 @@ export default function StudySession({ cards: initialCards }: StudySessionProps)
         <div className="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-xl backdrop-blur-xl">
           <h2 className="mb-2 text-2xl font-bold text-white">No Cards Due</h2>
           <p className="mb-6 text-sm text-blue-100/70">You have no cards due for review.</p>
-          <Button asChild variant="default">
+          <Button
+            asChild
+            variant="outline"
+            className="border-white/20 bg-black/50 text-white hover:bg-white/10 hover:text-white"
+          >
             <a href="/dashboard">Back to Dashboard</a>
           </Button>
         </div>
@@ -57,14 +61,19 @@ export default function StudySession({ cards: initialCards }: StudySessionProps)
           <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button
               type="button"
-              variant="default"
+              variant="outline"
               onClick={() => {
                 window.location.reload();
               }}
+              className="border-white/20 bg-black/50 text-white hover:bg-white/10 hover:text-white"
             >
               Study more cards
             </Button>
-            <Button asChild variant="outline" className="border-white/20 text-white hover:bg-white/10 hover:text-white">
+            <Button
+              asChild
+              variant="outline"
+              className="border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+            >
               <a href="/dashboard">Back to Dashboard</a>
             </Button>
           </div>
@@ -124,7 +133,7 @@ export default function StudySession({ cards: initialCards }: StudySessionProps)
           <Button
             variant="outline"
             className={cn(
-              "border-rose-500/30 text-rose-300 hover:bg-rose-500/10 hover:text-rose-200",
+              "border-rose-500/30 bg-white/5 text-rose-300 hover:bg-rose-500/10 hover:text-rose-200",
               "flex h-auto flex-col items-center justify-center py-5",
             )}
             disabled={isSubmitting}
@@ -139,7 +148,7 @@ export default function StudySession({ cards: initialCards }: StudySessionProps)
           <Button
             variant="outline"
             className={cn(
-              "border-amber-500/30 text-amber-300 hover:bg-amber-500/10 hover:text-amber-200",
+              "border-amber-500/30 bg-white/5 text-amber-300 hover:bg-amber-500/10 hover:text-amber-200",
               "flex h-auto flex-col items-center justify-center py-5",
             )}
             disabled={isSubmitting}
@@ -154,7 +163,7 @@ export default function StudySession({ cards: initialCards }: StudySessionProps)
           <Button
             variant="outline"
             className={cn(
-              "border-blue-500/30 text-blue-300 hover:bg-blue-500/10 hover:text-blue-200",
+              "border-blue-500/30 bg-white/5 text-blue-300 hover:bg-blue-500/10 hover:text-blue-200",
               "flex h-auto flex-col items-center justify-center py-5",
             )}
             disabled={isSubmitting}
@@ -169,7 +178,7 @@ export default function StudySession({ cards: initialCards }: StudySessionProps)
           <Button
             variant="outline"
             className={cn(
-              "border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10 hover:text-emerald-200",
+              "border-emerald-500/30 bg-white/5 text-emerald-300 hover:bg-emerald-500/10 hover:text-emerald-200",
               "flex h-auto flex-col items-center justify-center py-5",
             )}
             disabled={isSubmitting}

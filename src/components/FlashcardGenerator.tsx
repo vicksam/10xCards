@@ -104,21 +104,9 @@ export default function FlashcardGenerator({ isConfigured = true }: FlashcardGen
             </div>
 
             {state.status === "loading" && (
-              <div className="flex flex-col items-center justify-between gap-3 rounded-xl border border-purple-500/20 bg-purple-500/10 p-4 text-sm text-purple-200 sm:flex-row">
-                <div className="flex items-center gap-3">
-                  <Loader2 className="size-5 animate-spin text-purple-400" />
-                  <span>Generating flashcards with AI... This usually takes a few seconds.</span>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCancel}
-                  className="shrink-0 border-red-500/30 bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-white"
-                >
-                  <X className="size-3.5" />
-                  Cancel generation
-                </Button>
+              <div className="flex items-center gap-3 rounded-xl border border-purple-500/20 bg-purple-500/10 p-4 text-sm text-purple-200">
+                <Loader2 className="size-5 animate-spin text-purple-400" />
+                <span>Generating flashcards with AI... This usually takes a few seconds.</span>
               </div>
             )}
 
@@ -190,7 +178,12 @@ export default function FlashcardGenerator({ isConfigured = true }: FlashcardGen
             No cards could be generated from this text. Try with more content or more structured notes.
           </p>
           <div className="mt-6">
-            <Button type="button" onClick={handleReset} variant="outline" className="border-white/20 text-white">
+            <Button
+              type="button"
+              onClick={handleReset}
+              variant="outline"
+              className="border-white/20 bg-black/50 text-white hover:bg-white/10 hover:text-white"
+            >
               Try again
             </Button>
           </div>

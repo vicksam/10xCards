@@ -7,7 +7,7 @@ import { OPENROUTER_API_KEY } from "astro:env/server";
 <Layout title="Dashboard">
   <main class="bg-cosmic min-h-screen p-4 sm:p-6 lg:p-8">
     <div class="mx-auto max-w-3xl pt-2 pb-12">
-      <FlashcardGenerator isConfigured={Boolean(OPENROUTER_API_KEY)} client:load />
+      <FlashcardGenerator isConfigured={Boolean(OPENROUTER_API_KEY)} client:only="react" />
     </div>
   </main>
 </Layout>

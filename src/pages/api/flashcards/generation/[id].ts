@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase";
 export const prerender = false;
 
 const paramsSchema = z.object({
-  id: z.string().uuid("Invalid generation ID"),
+  id: z.uuid("Invalid generation ID"),
 });
 
 export const DELETE: APIRoute = async (context) => {
