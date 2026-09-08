@@ -106,8 +106,8 @@ We will build standard React components wrapping shadcn/ui components (`table`, 
 
 ## Progress
 
-- [x] Phase 1: API Endpoints (CRUD)
-- [ ] Phase 2: UI Components Setup
+- [x] Phase 1: API Endpoints (CRUD) — b1fd3f7
+- [x] Phase 2: UI Components Setup
 - [ ] Phase 3: Card Management Page & Navigation
 - [ ] Phase 4: Create & Edit Modals
 - [ ] Phase 5: Delete Functionality
