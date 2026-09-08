@@ -235,19 +235,19 @@ Allow continuous studying without returning to the dashboard by offering a full 
 
 #### Automated
 
-- [x] 3.1 Build succeeds: npm run build
+- [x] 3.1 Build succeeds: npm run build — 884987e
 
 #### Manual
 
-- [x] 3.2 Cancel during loading resets UI and DB
-- [x] 3.3 Cancel during review resets UI and DB
+- [x] 3.2 Cancel during loading resets UI and DB — 884987e
+- [x] 3.3 Cancel during review resets UI and DB — 884987e
 
 ### Phase 4: Study Session Reset
 
 #### Automated
 
-- [ ] 4.1 Build succeeds: npm run build
+- [x] 4.1 Build succeeds: npm run build
 
 #### Manual
 
-- [ ] 4.2 Study more cards reloads correctly
+- [x] 4.2 Study more cards reloads correctly

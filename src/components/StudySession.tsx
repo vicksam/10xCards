@@ -54,9 +54,20 @@ export default function StudySession({ cards: initialCards }: StudySessionProps)
         <div className="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-xl backdrop-blur-xl">
           <h2 className="mb-2 text-2xl font-bold text-white">Session Complete!</h2>
           <p className="mb-6 text-sm text-blue-100/70">You&apos;ve reviewed all due cards for now. Great job!</p>
-          <Button asChild variant="default">
-            <a href="/dashboard">Back to Dashboard</a>
-          </Button>
+          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => {
+                window.location.reload();
+              }}
+            >
+              Study more cards
+            </Button>
+            <Button asChild variant="outline" className="border-white/20 text-white hover:bg-white/10 hover:text-white">
+              <a href="/dashboard">Back to Dashboard</a>
+            </Button>
+          </div>
         </div>
       </div>
     );
