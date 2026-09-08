@@ -12,11 +12,17 @@ interface FlashcardGeneratorProps {
 
 export default function FlashcardGenerator({ isConfigured = true }: FlashcardGeneratorProps) {
   const [text, setText] = useState("");
-  const { state, generate, reset } = useFlashcardGeneration();
+  const { state, generate, reset, cancel } = useFlashcardGeneration();
 
   const handleReset = () => {
     setText("");
     reset();
+  };
+
+  const handleCancel = () => {
+    const generationId = state.status === "success" ? (state.generationId ?? undefined) : undefined;
+    void cancel(generationId);
+    setText("");
   };
 
   const trimmedLength = text.trim().length;
@@ -41,14 +47,28 @@ export default function FlashcardGenerator({ isConfigured = true }: FlashcardGen
 
       {(state.status === "idle" || state.status === "loading" || state.status === "error") && (
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur-xl md:p-8">
-          <div className="mb-6">
-            <h1 className="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent md:text-3xl">
-              Generate Flashcards with AI
-            </h1>
-            <p className="mt-2 text-sm text-blue-100/70">
-              Paste your study notes, articles, or summary text below. The AI will extract key concepts and generate Q&A
-              flashcards for review.
-            </p>
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h1 className="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent md:text-3xl">
+                Generate Flashcards with AI
+              </h1>
+              <p className="mt-2 text-sm text-blue-100/70">
+                Paste your study notes, articles, or summary text below. The AI will extract key concepts and generate
+                Q&A flashcards for review.
+              </p>
+            </div>
+            {state.status === "loading" && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleCancel}
+                className="self-start border-red-500/30 bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-white"
+              >
+                <X className="size-3.5" />
+                Cancel generation
+              </Button>
+            )}
           </div>
 
           <div className="space-y-4">
@@ -84,9 +104,21 @@ export default function FlashcardGenerator({ isConfigured = true }: FlashcardGen
             </div>
 
             {state.status === "loading" && (
-              <div className="flex items-center justify-center gap-3 rounded-xl border border-purple-500/20 bg-purple-500/10 p-4 text-sm text-purple-200">
-                <Loader2 className="size-5 animate-spin text-purple-400" />
-                <span>Generating flashcards with AI... This usually takes a few seconds.</span>
+              <div className="flex flex-col items-center justify-between gap-3 rounded-xl border border-purple-500/20 bg-purple-500/10 p-4 text-sm text-purple-200 sm:flex-row">
+                <div className="flex items-center gap-3">
+                  <Loader2 className="size-5 animate-spin text-purple-400" />
+                  <span>Generating flashcards with AI... This usually takes a few seconds.</span>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancel}
+                  className="shrink-0 border-red-500/30 bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-white"
+                >
+                  <X className="size-3.5" />
+                  Cancel generation
+                </Button>
               </div>
             )}
 
@@ -108,7 +140,7 @@ export default function FlashcardGenerator({ isConfigured = true }: FlashcardGen
                     className="border-destructive/30 bg-destructive/20 hover:bg-destructive/30 text-white"
                   >
                     <RotateCcw className="size-3.5" />
-                    Try again
+                    Try again (up to 60s)
                   </Button>
                 </div>
               </div>
@@ -140,7 +172,12 @@ export default function FlashcardGenerator({ isConfigured = true }: FlashcardGen
       )}
 
       {state.status === "success" && state.generationId !== null && state.candidates.length > 0 && (
-        <CardReview generationId={state.generationId} candidates={state.candidates} onReset={handleReset} />
+        <CardReview
+          generationId={state.generationId}
+          candidates={state.candidates}
+          onReset={handleReset}
+          onCancel={handleCancel}
+        />
       )}
 
       {state.status === "success" && (state.generationId === null || state.candidates.length === 0) && (
@@ -167,9 +204,10 @@ interface CardReviewProps {
   generationId: string;
   candidates: CandidateCard[];
   onReset: () => void;
+  onCancel?: () => void;
 }
 
-function CardReview({ generationId, candidates, onReset }: CardReviewProps) {
+function CardReview({ generationId, candidates, onReset, onCancel }: CardReviewProps) {
   const {
     cards,
     currentIndex,
@@ -230,6 +268,20 @@ function CardReview({ generationId, candidates, onReset }: CardReviewProps) {
   if (isDone && savedCount === null) {
     return (
       <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur-xl md:p-8">
+        {onCancel && (
+          <div className="mb-4 flex justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onCancel}
+              className="border-red-500/30 bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-white"
+            >
+              <X className="size-3.5" />
+              Cancel generation
+            </Button>
+          </div>
+        )}
         <div className="text-center">
           <h2 className="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent">
             Review Complete
@@ -261,7 +313,7 @@ function CardReview({ generationId, candidates, onReset }: CardReviewProps) {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={onReset}
+                  onClick={onCancel ?? onReset}
                   className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
                 >
                   Discard / Generate more
@@ -343,9 +395,23 @@ function CardReview({ generationId, candidates, onReset }: CardReviewProps) {
           <span className="font-semibold text-blue-200">
             Card {currentIndex + 1} of {cards.length}
           </span>
-          <span className="text-xs text-white/60">
-            {acceptedCount} accepted · {rejectedCount} rejected
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-white/60">
+              {acceptedCount} accepted · {rejectedCount} rejected
+            </span>
+            {onCancel && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={onCancel}
+                className="border-red-500/30 bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-white"
+              >
+                <X className="size-3.5" />
+                Cancel generation
+              </Button>
+            )}
+          </div>
         </div>
         <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
           <div

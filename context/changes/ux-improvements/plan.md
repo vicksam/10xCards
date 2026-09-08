@@ -12,7 +12,7 @@ Implement S-04 UX improvements across the generation and study flows: progressiv
 
 ## Desired End State
 
-1. **Progressive Timeouts**: 
+1. **Progressive Timeouts**:
    - Attempt 1: 30s client timeout (25s server timeout).
    - Silent Attempt 2 (on retryable error): 45s client timeout (40s server timeout).
    - Manual Attempt 3 ("Try again" button): 60s client timeout (55s server timeout).
@@ -49,7 +49,8 @@ Allow users to hard-delete their own unfinalized generation sessions by introduc
 
 **Intent**: Drop the existing `using (false)` DELETE policy on `generation_reviews` and allow users to delete their unfinalized rows.
 
-**Contract**: 
+**Contract**:
+
 ```sql
 CREATE POLICY "Users can delete their own unfinalized generation reviews"
   ON generation_reviews FOR DELETE
@@ -99,7 +100,8 @@ Implement escalating timeouts and propagate them to the server SDK, allowing lon
 
 **Intent**: Manage escalating timeouts per retry and expose a `cancel` method that cleans up the database.
 
-**Contract**: 
+**Contract**:
+
 - Track `lastAttemptTimeout` for UI.
 - Use 30000ms for attempt 1, 45000ms for silent retry, 60000ms for manual retry.
 - Add `cancel(generationId?: string)` method firing a DELETE request to `/api/flashcards/generation/${generationId}`.
@@ -177,12 +179,15 @@ Allow continuous studying without returning to the dashboard by offering a full 
 ## Testing Strategy
 
 ### Unit Tests:
+
 - Ensure the `useFlashcardGeneration` hook handles timeouts appropriately (if test suite exists).
 
 ### Integration Tests:
+
 - End-to-end testing of the `DELETE` API route with simulated user sessions.
 
 ### Manual Testing Steps:
+
 1. Trigger generation, wait for it to hang, observe timeout behavior.
 2. Cancel generation mid-flight, verify database state in Supabase Studio.
 3. Finish a study session and verify the reload functionality.
@@ -219,23 +224,23 @@ Allow continuous studying without returning to the dashboard by offering a full 
 
 #### Automated
 
-- [x] 2.1 TypeScript type checks pass: npx tsc --noEmit
-- [x] 2.2 ESLint passes: npm run lint
+- [x] 2.1 TypeScript type checks pass: npx tsc --noEmit — 79a9f29
+- [x] 2.2 ESLint passes: npm run lint — 79a9f29
 
 #### Manual
 
-- [x] 2.3 Simulated slow generation escalates timeouts properly
+- [x] 2.3 Simulated slow generation escalates timeouts properly — 79a9f29
 
 ### Phase 3: Cancel UI
 
 #### Automated
 
-- [ ] 3.1 Build succeeds: npm run build
+- [x] 3.1 Build succeeds: npm run build
 
 #### Manual
 
-- [ ] 3.2 Cancel during loading resets UI and DB
-- [ ] 3.3 Cancel during review resets UI and DB
+- [x] 3.2 Cancel during loading resets UI and DB
+- [x] 3.3 Cancel during review resets UI and DB
 
 ### Phase 4: Study Session Reset
 
