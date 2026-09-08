@@ -1,7 +1,7 @@
 ---
 change_id: card-management
 title: Manual card creation and flashcard management
-status: plan_reviewed
+status: implementing
 created: 2026-09-08
 updated: 2026-09-08
 archived_at: null
