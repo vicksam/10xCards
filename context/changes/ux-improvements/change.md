@@ -1,6 +1,6 @@
 ---
 topic: UX improvements
-status: implementing
+status: implemented
 updated: 2026-09-08
 ---
 

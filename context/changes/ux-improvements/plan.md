@@ -246,8 +246,8 @@ Allow continuous studying without returning to the dashboard by offering a full 
 
 #### Automated
 
-- [x] 4.1 Build succeeds: npm run build
+- [x] 4.1 Build succeeds: npm run build — 9bcb57b
 
 #### Manual
 
-- [x] 4.2 Study more cards reloads correctly
+- [x] 4.2 Study more cards reloads correctly — 9bcb57b
