@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useCardManager } from "@/components/hooks/useCardManager";
 import { cn } from "@/lib/utils";
-import { Plus, Edit2 } from "lucide-react";
+import { Plus, Edit2, Trash2 } from "lucide-react";
 import type { Flashcard } from "@/types";
 
 interface CardManagerProps {
@@ -24,12 +24,8 @@ interface CardManagerProps {
 }
 
 export default function CardManager({ initialCards = [], initialCount = 0 }: CardManagerProps) {
-  const { cards, count, isLoading, error, page, limit, setPage, fetchCards, createCard, updateCard } = useCardManager(
-    initialCards,
-    initialCount,
-    1,
-    10,
-  );
+  const { cards, count, isLoading, error, page, limit, setPage, fetchCards, createCard, updateCard, deleteCard } =
+    useCardManager(initialCards, initialCount, 1, 10);
 
   // Create modal state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -44,6 +40,11 @@ export default function CardManager({ initialCards = [], initialCount = 0 }: Car
   const [editBack, setEditBack] = useState("");
   const [editError, setEditError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Delete modal state
+  const [deletingCard, setDeletingCard] = useState<Flashcard | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const totalPages = Math.max(1, Math.ceil(count / limit));
 
@@ -146,6 +147,19 @@ export default function CardManager({ initialCards = [], initialCount = 0 }: Car
     }
   }
 
+  async function handleDeleteConfirm() {
+    if (!deletingCard) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    const res = await deleteCard(deletingCard.id);
+    setIsDeleting(false);
+    if (res.success) {
+      setDeletingCard(null);
+    } else {
+      setDeleteError(res.error ?? "Failed to delete card");
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -233,6 +247,19 @@ export default function CardManager({ initialCards = [], initialCount = 0 }: Car
                       >
                         <Edit2 className="mr-1 size-3.5" />
                         <span>Edit</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setDeletingCard(card);
+                          setDeleteError(null);
+                        }}
+                        className="h-8 px-2 text-xs text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                        title="Delete Card"
+                      >
+                        <Trash2 className="mr-1 size-3.5" />
+                        <span>Delete</span>
                       </Button>
                     </div>
                   </TableCell>
@@ -439,6 +466,61 @@ export default function CardManager({ initialCards = [], initialCount = 0 }: Car
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Card Confirmation Dialog */}
+      <Dialog
+        open={Boolean(deletingCard)}
+        onOpenChange={(open) => {
+          if (!open) setDeletingCard(null);
+        }}
+      >
+        <DialogContent className="border-white/10 bg-slate-900 text-white sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-white">Delete Flashcard</DialogTitle>
+            <DialogDescription className="text-sm text-slate-400">
+              Are you sure you want to delete this flashcard? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          {deleteError && (
+            <div className="rounded-md border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-400">
+              {deleteError}
+            </div>
+          )}
+
+          {deletingCard && (
+            <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-slate-300">
+              <p className="truncate font-medium text-white">{deletingCard.front}</p>
+              <p className="mt-1 truncate text-xs text-slate-400">{deletingCard.back}</p>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setDeletingCard(null);
+              }}
+              disabled={isDeleting}
+              className="border-white/10 text-white hover:bg-white/10"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => {
+                void handleDeleteConfirm();
+              }}
+              disabled={isDeleting}
+              className="bg-red-600 text-white hover:bg-red-500"
+            >
+              {isDeleting ? "Deleting..." : "Delete Flashcard"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
