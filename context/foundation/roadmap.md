@@ -32,7 +32,7 @@ Manual flashcard creation is slow and happens when energy is lowest — after a 
 | F-01 | flashcard-schema | (foundation) Supabase migration pipeline and flashcards table with RLS landed | — | Access Control | done |
 | S-01 | ai-card-generation | paste study text, trigger AI generation, review candidates (accept/edit/reject), and save accepted cards | F-01 | US-01, FR-001, FR-002, FR-003, FR-004 | done |
 | S-02 | spaced-repetition-session | start a spaced repetition study session with scheduling | F-01 | FR-007 | done |
-| S-03 | card-management | manually create a flashcard and view, edit, delete saved flashcards | F-01 | FR-005, FR-006 | planning |
+| S-03 | card-management | manually create a flashcard and view, edit, delete saved flashcards | F-01 | FR-005, FR-006 | in-progress |
 | S-04 | ux-improvements | experience progressive load timeouts, reset a review session, and cancel card generation (stopping stat + db writes) | F-01 | NFR (30 s generation) | done |
 
 ## Baseline
@@ -98,7 +98,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Low implementation risk (standard CRUD). Manual creation is the safety valve for AI generation failures. Sequenced last because it is off the critical retention loop (generate → study) and does not block other slices.
-- **Status:** planning
+- **Status:** in-progress
 
 ### S-04: UX improvements
 
