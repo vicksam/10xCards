@@ -33,7 +33,7 @@ Manual flashcard creation is slow and happens when energy is lowest — after a 
 | S-01 | ai-card-generation | paste study text, trigger AI generation, review candidates (accept/edit/reject), and save accepted cards | F-01 | US-01, FR-001, FR-002, FR-003, FR-004 | done |
 | S-02 | spaced-repetition-session | start a spaced repetition study session with scheduling | F-01 | FR-007 | done |
 | S-03 | card-management | manually create a flashcard and view, edit, delete saved flashcards | F-01 | FR-005, FR-006 | planning |
-| S-04 | ux-improvements | experience progressive load timeouts, reset a review session, and cancel card generation (stopping stat + db writes) | F-01 | NFR (30 s generation) | in-progress |
+| S-04 | ux-improvements | experience progressive load timeouts, reset a review session, and cancel card generation (stopping stat + db writes) | F-01 | NFR (30 s generation) | done |
 
 ## Baseline
 
@@ -110,7 +110,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Timeout progression and cancel-with-abort require tight coordination between UI state, API fetch lifecycle, and the DB write path introduced in S-01. Must not regress the S-01 generation flow or S-02 session reliability KPI.
-- **Status:** in-progress
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -140,3 +140,5 @@ _None — all product-level decisions were locked during shaping (PRD §Open Que
 - **F-01: (foundation) Supabase migration pipeline and flashcards table with RLS landed** — Archived 2026-08-23 → `context/archive/2026-08-23-flashcard-schema/`. Lesson: —.
 - **S-01: AI flashcard generation and candidate review** — Archived 2026-09-02 → `context/archive/2026-09-02-ai-card-generation/`. Lesson: —.
 - **S-02: start a spaced repetition study session using an open-source scheduling algorithm; cards recalled easily appear later, cards recalled with difficulty appear sooner.** — Archived 2026-09-03 → `context/archive/2026-09-02-spaced-repetition-session/`. Lesson: —.
+
+- **S-04: user experiences progressive generation timeouts, reset a review session, and cancel card generation (stopping stat + db writes)** — Archived 2026-09-08 → `context/archive/2026-09-08-ux-improvements/`. Lesson: —.
