@@ -75,6 +75,17 @@ const pathname = Astro.url.pathname;
                   Study
                 </a>
                 <a
+                  href="/cards"
+                  class:list={cn(
+                    "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                    pathname === "/cards"
+                      ? "bg-white/15 text-white"
+                      : "text-blue-100/70 hover:bg-white/10 hover:text-white",
+                  )}
+                >
+                  My Cards
+                </a>
+                <a
                   href="/stats"
                   class:list={cn(
                     "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",

@@ -1,0 +1,31 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import CardManager from "@/components/CardManager";
+import { createClient } from "@/lib/supabase";
+import type { Flashcard } from "@/types";
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+
+let initialCards: Flashcard[] = [];
+let initialCount = 0;
+
+if (supabase && Astro.locals.user) {
+  const { data, count } = await supabase
+    .from("flashcards")
+    .select("*", { count: "exact" })
+    .eq("user_id", Astro.locals.user.id)
+    .order("created_at", { ascending: false })
+    .range(0, 9);
+
+  initialCards = data ?? [];
+  initialCount = count ?? 0;
+}
+---
+
+<Layout title="My Cards - 10xCards">
+  <main class="bg-cosmic min-h-screen p-4 sm:p-6 lg:p-8">
+    <div class="mx-auto max-w-5xl pt-4 pb-12">
+      <CardManager initialCards={initialCards} initialCount={initialCount} client:load />
+    </div>
+  </main>
+</Layout>
