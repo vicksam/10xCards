@@ -104,6 +104,11 @@ We will build standard React components wrapping shadcn/ui components (`table`, 
 - Clicking "Delete" prompts for confirmation.
 - After confirming, the card is removed from the database and the table updates.
 
+## Addenda
+
+- **SSR Pre-fetching**: Added server-side data fetching directly in `src/pages/cards.astro` to pre-load the first 10 cards and pass them to the client component, avoiding an initial loading spinner.
+- **Global Navigation**: Updated `src/layouts/Layout.astro` and `src/middleware.ts` (PROTECTED_ROUTES) in addition to `Topbar.astro` to ensure full navigation integration and route security.
+
 ## Progress
 
 - [x] Phase 1: API Endpoints (CRUD) — b1fd3f7

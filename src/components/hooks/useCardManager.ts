@@ -1,6 +1,16 @@
 import { useState, useCallback } from "react";
 import type { Flashcard } from "@/types";
 
+async function extractError(res: Response, defaultMessage: string) {
+  const text = await res.text();
+  try {
+    const data = JSON.parse(text) as { error?: string };
+    return data.error ?? defaultMessage;
+  } catch {
+    return defaultMessage;
+  }
+}
+
 interface UseCardManagerResult {
   cards: Flashcard[];
   count: number;
@@ -34,8 +44,7 @@ export function useCardManager(
       try {
         const res = await fetch(`/api/flashcards?page=${targetPage}&limit=${limit}`);
         if (!res.ok) {
-          const data = (await res.json()) as { error?: string };
-          throw new Error(data.error ?? "Failed to fetch flashcards");
+          throw new Error(await extractError(res, "Failed to fetch flashcards"));
         }
         const json = (await res.json()) as { data: Flashcard[]; count: number };
         setCards(json.data);
@@ -59,8 +68,7 @@ export function useCardManager(
           body: JSON.stringify({ front, back }),
         });
         if (!res.ok) {
-          const data = (await res.json()) as { error?: string };
-          return { success: false, error: data.error ?? "Failed to create flashcard" };
+          return { success: false, error: await extractError(res, "Failed to create flashcard") };
         }
         await fetchCards(1);
         return { success: true };
@@ -79,8 +87,7 @@ export function useCardManager(
         body: JSON.stringify({ front, back }),
       });
       if (!res.ok) {
-        const data = (await res.json()) as { error?: string };
-        return { success: false, error: data.error ?? "Failed to update flashcard" };
+        return { success: false, error: await extractError(res, "Failed to update flashcard") };
       }
       const json = (await res.json()) as { data: Flashcard };
       setCards((prev) => prev.map((c) => (c.id === id ? json.data : c)));
@@ -96,8 +103,7 @@ export function useCardManager(
         method: "DELETE",
       });
       if (!res.ok) {
-        const data = (await res.json()) as { error?: string };
-        return { success: false, error: data.error ?? "Failed to delete flashcard" };
+        return { success: false, error: await extractError(res, "Failed to delete flashcard") };
       }
       setCards((prev) => prev.filter((c) => c.id !== id));
       setCount((prev) => Math.max(0, prev - 1));

@@ -182,7 +182,12 @@ export default function CardManager({ initialCards = [], initialCount = 0 }: Car
         <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
           <p className="font-semibold">Error</p>
           <p>{error}</p>
-          <Button variant="outline" size="sm" onClick={() => void fetchCards()} className="mt-2 text-xs">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => void fetchCards()}
+            className="mt-2 cursor-pointer border-white/10 bg-white/5 text-xs text-white hover:bg-white/15 hover:text-white"
+          >
             Retry
           </Button>
         </div>
@@ -283,7 +288,7 @@ export default function CardManager({ initialCards = [], initialCount = 0 }: Car
                 onClick={() => {
                   setPage(page - 1);
                 }}
-                className="border-white/10 text-xs text-white hover:bg-white/10"
+                className="cursor-pointer border-white/10 bg-white/5 text-xs text-white hover:bg-white/15 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Previous
               </Button>
@@ -297,7 +302,7 @@ export default function CardManager({ initialCards = [], initialCount = 0 }: Car
                 onClick={() => {
                   setPage(page + 1);
                 }}
-                className="border-white/10 text-xs text-white hover:bg-white/10"
+                className="cursor-pointer border-white/10 bg-white/5 text-xs text-white hover:bg-white/15 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next
               </Button>
@@ -373,7 +378,7 @@ export default function CardManager({ initialCards = [], initialCount = 0 }: Car
                   setIsCreateOpen(false);
                 }}
                 disabled={isCreating}
-                className="border-white/10 text-white hover:bg-white/10"
+                className="cursor-pointer border-white/10 bg-white/5 text-white hover:bg-white/15 hover:text-white"
               >
                 Cancel
               </Button>
@@ -457,7 +462,7 @@ export default function CardManager({ initialCards = [], initialCount = 0 }: Car
                   setEditingCard(null);
                 }}
                 disabled={isUpdating}
-                className="border-white/10 text-white hover:bg-white/10"
+                className="cursor-pointer border-white/10 bg-white/5 text-white hover:bg-white/15 hover:text-white"
               >
                 Cancel
               </Button>
@@ -491,9 +496,19 @@ export default function CardManager({ initialCards = [], initialCount = 0 }: Car
           )}
 
           {deletingCard && (
-            <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-slate-300">
-              <p className="truncate font-medium text-white">{deletingCard.front}</p>
-              <p className="mt-1 truncate text-xs text-slate-400">{deletingCard.back}</p>
+            <div className="max-h-60 min-w-0 max-w-full overflow-y-auto rounded-lg border border-white/10 bg-white/5 p-3.5 text-sm text-slate-300">
+              <div>
+                <span className="text-[10px] font-semibold tracking-wider uppercase text-purple-300/80">Front</span>
+                <p className="mt-0.5 font-medium text-white break-words whitespace-pre-wrap [overflow-wrap:anywhere]">
+                  {deletingCard.front}
+                </p>
+              </div>
+              <div className="mt-3 border-t border-white/5 pt-2.5">
+                <span className="text-[10px] font-semibold tracking-wider uppercase text-slate-400/80">Back</span>
+                <p className="mt-0.5 text-xs text-slate-300 break-words whitespace-pre-wrap [overflow-wrap:anywhere]">
+                  {deletingCard.back}
+                </p>
+              </div>
             </div>
           )}
 
@@ -505,7 +520,7 @@ export default function CardManager({ initialCards = [], initialCount = 0 }: Car
                 setDeletingCard(null);
               }}
               disabled={isDeleting}
-              className="border-white/10 text-white hover:bg-white/10"
+              className="cursor-pointer border-white/10 bg-white/5 text-white hover:bg-white/15 hover:text-white"
             >
               Cancel
             </Button>

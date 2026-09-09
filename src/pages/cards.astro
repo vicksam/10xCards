@@ -10,12 +10,17 @@ let initialCards: Flashcard[] = [];
 let initialCount = 0;
 
 if (supabase && Astro.locals.user) {
-  const { data, count } = await supabase
+  const { data, count, error } = await supabase
     .from("flashcards")
     .select("*", { count: "exact" })
     .eq("user_id", Astro.locals.user.id)
     .order("created_at", { ascending: false })
     .range(0, 9);
+
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to pre-fetch flashcards:", error);
+  }
 
   initialCards = data ?? [];
   initialCount = count ?? 0;
