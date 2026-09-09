@@ -1,7 +1,7 @@
 ---
 change_id: scaffold-cleanup
 title: Scaffold cleanup
-status: new
+status: preparing
 created: 2026-09-09
 updated: 2026-09-09
 archived_at: null
