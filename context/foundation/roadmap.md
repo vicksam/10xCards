@@ -3,7 +3,7 @@ project: "10xCards"
 version: 1
 status: draft
 created: 2026-08-22
-updated: 2026-09-08
+updated: 2026-09-09
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -32,7 +32,7 @@ Manual flashcard creation is slow and happens when energy is lowest — after a 
 | F-01 | flashcard-schema | (foundation) Supabase migration pipeline and flashcards table with RLS landed | — | Access Control | done |
 | S-01 | ai-card-generation | paste study text, trigger AI generation, review candidates (accept/edit/reject), and save accepted cards | F-01 | US-01, FR-001, FR-002, FR-003, FR-004 | done |
 | S-02 | spaced-repetition-session | start a spaced repetition study session with scheduling | F-01 | FR-007 | done |
-| S-03 | card-management | manually create a flashcard and view, edit, delete saved flashcards | F-01 | FR-005, FR-006 | in-progress |
+| S-03 | card-management | manually create a flashcard and view, edit, delete saved flashcards | F-01 | FR-005, FR-006 | done |
 | S-04 | ux-improvements | experience progressive load timeouts, reset a review session, and cancel card generation (stopping stat + db writes) | F-01 | NFR (30 s generation) | done |
 
 ## Baseline
@@ -98,7 +98,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Low implementation risk (standard CRUD). Manual creation is the safety valve for AI generation failures. Sequenced last because it is off the critical retention loop (generate → study) and does not block other slices.
-- **Status:** in-progress
+- **Status:** done
 
 ### S-04: UX improvements
 
@@ -119,8 +119,8 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | F-01 | flashcard-schema | Set up Supabase migrations and flashcards table with RLS | done | — |
 | S-01 | ai-card-generation | AI flashcard generation from pasted text with candidate review | done | North star; plan reviewed, run `/10x-implement ai-card-generation phase 1` |
 | S-02 | spaced-repetition-session | Spaced repetition study session with SR algorithm | done | Archived |
-| S-03 | card-management | Manual card creation and flashcard CRUD | yes | Parallel with S-01 |
-| S-04 | ux-improvements | Progressive generation timeouts, session reset, cancel generation | in-progress | Parallel with S-03 |
+| S-03 | card-management | Manual card creation and flashcard CRUD | done | Archived |
+| S-04 | ux-improvements | Progressive generation timeouts, session reset, cancel generation | done | Archived |
 
 ## Open Roadmap Questions
 
@@ -140,5 +140,5 @@ _None — all product-level decisions were locked during shaping (PRD §Open Que
 - **F-01: (foundation) Supabase migration pipeline and flashcards table with RLS landed** — Archived 2026-08-23 → `context/archive/2026-08-23-flashcard-schema/`. Lesson: —.
 - **S-01: AI flashcard generation and candidate review** — Archived 2026-09-02 → `context/archive/2026-09-02-ai-card-generation/`. Lesson: —.
 - **S-02: start a spaced repetition study session using an open-source scheduling algorithm; cards recalled easily appear later, cards recalled with difficulty appear sooner.** — Archived 2026-09-03 → `context/archive/2026-09-02-spaced-repetition-session/`. Lesson: —.
-
+- **S-03: user can manually create a flashcard (front + back) and view, edit, and delete their saved flashcards.** — Archived 2026-09-09 → `context/archive/2026-09-08-card-management/`. Lesson: —.
 - **S-04: user experiences progressive generation timeouts, reset a review session, and cancel card generation (stopping stat + db writes)** — Archived 2026-09-08 → `context/archive/2026-09-08-ux-improvements/`. Lesson: —.
