@@ -73,7 +73,7 @@ orchestrator updates Status as artifacts appear on disk.
 
 | # | Phase name | Goal (one line) | Risks covered | Test types | Status | Change folder |
 |---|---|---|---|---|---|---|
-| 1 | Bootstrap + critical-path unit | Install vitest and cover LLM parsing and retry state machine — highest signal at zero infrastructure cost | R1, R4 | unit | researched | testing-bootstrap-critical-path |
+| 1 | Bootstrap + critical-path unit | Install vitest and cover LLM parsing and retry state machine — highest signal at zero infrastructure cost | R1, R4 | unit | planned | testing-bootstrap-critical-path |
 | 2 | Integration — data integrity & error paths | Cover finalization failure surfacing, orphaned-row KPI impact, and text leakage on error paths | R2, R3, R7 | integration (mocked Supabase + API) | not started | — |
 | 3 | Integration — ownership & auth boundaries | Cover IDOR on generation review and auth-expiry surfacing during study | R5, R6 | integration (two test users, simulated expired session) | not started | — |
 | 4 | Quality-gates wiring | Add `npm test` script; lock vitest + lint + typecheck in CI | — (floor) | gate config | not started | — |
