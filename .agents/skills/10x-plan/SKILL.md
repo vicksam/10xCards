@@ -82,12 +82,12 @@ Before any reading, identify what kinds of upstream artifacts the user passed in
    - Related implementation plans
    - Any JSON/data files mentioned
    - `context/foundation/lessons.md` if present — treat its rules as priors when probing scope, edge cases, and architecture choices; rules already accepted by the team narrow which design pitfalls still need fresh questioning.
-   - **IMPORTANT**: Use your AI coding assistant's file reading capability to read entire files
+   - **IMPORTANT**: Read the entire contents of files
    - **CRITICAL**: DO NOT spawn sub-tasks before reading these files yourself in the main context
    - **NEVER** read files partially - if a file is mentioned, read it completely
 
 2. **Spawn initial research tasks to gather context** (skip or narrow based on Step 1.0):
-   Before asking the user any questions, use your AI coding assistant's task management capabilities to create parallel sub-agents to research:
+   Before asking the user any questions, use your AI coding assistant to create parallel sub-agents to research:
    - **Explore agent** (`subagent_type: "Explore"`) — find all files related to the task, search for patterns, trace code paths. Use for file discovery and codebase structure questions.
    - **general-purpose agent** (`subagent_type: "general-purpose"`) — for deeper analysis that may require reading many files and synthesizing findings. Use for understanding complex systems.
 
@@ -139,7 +139,7 @@ Before any reading, identify what kinds of upstream artifacts the user passed in
    ```
 
    Ask the user: "Does this complexity assessment match your expectations?"
-   Provide options:
+   Options:
    - "Agree — proceed with [N] questions" (description: "The assessment is accurate, let's dig into the details.")
    - "Higher — ask more questions" (description: "There's more complexity than identified. I'll explain what's missing.")
    - "Lower — fewer questions needed" (description: "This is simpler than it looks. Let's keep it focused.")
@@ -160,8 +160,8 @@ Before any reading, identify what kinds of upstream artifacts the user passed in
 
    **Rules for structuring questions:**
    - Each question should have 2-4 concrete options
-   - Indicate when choices aren't mutually exclusive
-   - Keep headers short (max 12 chars): "Scope", "Edge cases", "Priority"
+   - Use `multiSelect: true` only when choices aren't mutually exclusive
+   - Keep `header` short (max 12 chars): "Scope", "Edge cases", "Priority"
    - The user can always choose "Other" for free-form input
 
    **Every option MUST include a recommendation signal and tradeoff analysis:**
@@ -173,7 +173,6 @@ Before any reading, identify what kinds of upstream artifacts the user passed in
    **Example question with recommendations (software):** `Conflicts` is `[S]` — solution architecture; always asked even when a frame defined the problem.
 
    Ask the user: "How should the system handle conflicts when two users edit simultaneously?"
-   Header: "Conflicts"
    Options:
    - "Last write wins" (description: "Later save silently overwrites earlier one. · Strength: Zero added complexity, no UI changes needed. · Tradeoff: Users can lose work without warning — acceptable only if edits are rare or low-stakes.")
    - "⭐ Recommended: Notify and merge" (description: "Show conflict to user, let them choose which version to keep. · Strength: Prevents data loss while keeping UX simple — matches the pattern in existing EditPanel component. · Tradeoff: Adds a conflict resolution modal and WebSocket subscription for real-time detection.")
@@ -182,7 +181,6 @@ Before any reading, identify what kinds of upstream artifacts the user passed in
    **Example question with recommendations (non-software — content/strategy):** `Depth` is `[D]` — diagnostic about audience/scope; skip if a frame brief already settled who this is for.
 
    Ask the user: "What depth of technical detail should the course module target?"
-   Header: "Depth"
    Options:
    - "Conceptual overview" (description: "High-level principles, no code. · Strength: Accessible to all skill levels, faster to produce. · Tradeoff: Advanced learners may find it too shallow — risks losing engagement.")
    - "⭐ Recommended: Hands-on with guided examples" (description: "Concepts paired with step-by-step exercises. · Strength: Balances understanding and practice — matches the format that got highest completion rates in 10xDevs2. · Tradeoff: 2-3x more prep time per lesson; requires working example repos.")
@@ -278,10 +276,10 @@ After getting initial clarifications from the user, NOW is when you address the 
    - Read the specific files/directories they mention
    - Only proceed once you've verified the facts yourself
 
-3. **Create research tasks** using your AI coding assistant's task creation feature to track exploration (these appear in the user's status bar). Update them via your AI coding assistant's task update feature as research completes.
+3. **Create research tasks** using your AI coding assistant's task management features to track exploration (these appear in the user's status bar). Update them as research completes.
 
 4. **Spawn parallel sub-tasks for comprehensive research**:
-   - Create multiple task agents to research different aspects concurrently
+   - Create multiple AI agents to research different aspects concurrently
    - Use the right agent type for each research need:
 
    **For codebase investigation:**
@@ -315,7 +313,6 @@ After getting initial clarifications from the user, NOW is when you address the 
    Then, if there are multiple valid approaches, present them as structured choices:
 
    Ask the user: "Which implementation approach should we use?"
-   Header: "Approach"
    Options:
    - "[Option A name]" (description: "[Key tradeoffs: simpler but X, or faster but Y]")
    - "[Option B name]" (description: "[Key tradeoffs]")
@@ -344,7 +341,6 @@ Once aligned on approach:
    ```
 
    Then ask the user: "Does this phase breakdown look right?"
-   Header: "Phases"
    Options:
    - "Looks good, proceed" (description: "Write the detailed plan with these phases.")
    - "Needs adjustment" (description: "I'll explain what to change before you write the detailed plan.")
@@ -639,7 +635,7 @@ Do this in Step 4 (right after the `change.md` → `planned` stamp). The lookup 
    - and in the `## Foundations` / `## Slices` bodies — the `### <ID>: …` block that contains a `- **Change ID:** <change-id>` line.
 
    Match is exact-string only. **No match** → print `ℹ context/foundation/roadmap.md has no item with Change ID "<change-id>" — roadmap left untouched.` and stop here.
-3. **Match found** → if the item's `- **Status:**` is already `planning`, `in-progress`, or `done`, leave it untouched (**forward-only**: never regress a more-advanced status) and stop. Otherwise apply both edits using your AI coding assistant's file editing capabilities — each independent and best effort; skip a sub-edit whose target isn't where the `/10x-roadmap` template puts it, and note the skip. Touch only the `Status` field:
+3. **Match found** → if the item's `- **Status:**` is already `planning`, `in-progress`, or `done`, leave it untouched (**forward-only**: never regress a more-advanced status) and stop. Otherwise apply both edits to the file — each independent and best effort; skip a sub-edit whose target isn't where the `/10x-roadmap` template puts it, and note the skip. Touch only the `Status` field:
    1. **`## At a glance`** — set the matched row's **Status** cell to `planning`.
    2. **Item body** — rewrite the item's `- **Status:**` line to `- **Status:** planning`.
 
@@ -673,7 +669,7 @@ Do this in Step 4 (right after the `change.md` → `planned` stamp). The lookup 
    - Include "what we're NOT doing"
 
 5. **Track Progress**:
-   - Use your AI coding assistant's task creation feature to create planning tasks and its task update feature to mark them completed as you progress
+   - Use your AI coding assistant's task management features to create planning tasks and mark them completed as you progress
    - Tasks appear in the user's status bar for visibility
    - Mark tasks completed as you finish research areas
 
@@ -745,13 +741,11 @@ Planning can be context-heavy due to research + iteration. Keep context efficien
 Mixed: `Loading UX` is `[S]` (UI behavior — solution detail); `Scale` is `[D]` (problem boundary — how big is the dataset). With a frame brief, ask only `Loading UX`; the scale should already be in the Reframed (or Confirmed) Problem Statement.
 
 Ask the user: "What should the user see while new items load?"
-Header: "Loading UX"
 Options:
 - "Inline spinner" (description: "Small spinner below existing content. · Strength: User keeps seeing current items, minimal UI work. · Tradeoff: Feels slower than skeleton — users see a generic spinner instead of content shape.")
 - "⭐ Recommended: Skeleton screens" (description: "Placeholder shapes matching item layout. · Strength: Perceived performance is 30-40% better — matches existing LoadingSkeleton component pattern. · Tradeoff: Requires a skeleton variant per item type; breaks if layout changes.")
 - "Full-page spinner" (description: "Replace content with spinner. · Strength: Simplest to implement — one component, no layout concerns. · Tradeoff: Blocks all interaction; feels broken on slow connections.")
 Ask the user: "How many items should this handle gracefully?"
-Header: "Scale"
 Options:
 - "⭐ Recommended: Hundreds" (description: "Standard offset pagination. · Strength: Simple, well-understood, works with existing SQL queries. · Tradeoff: Breaks down past ~5k items — acceptable given current data volumes.")
 - "Thousands" (description: "Cursor-based pagination + virtual scrolling. · Strength: Handles growth without performance cliff. · Tradeoff: 2-3x more implementation work; changes API contract.")
@@ -762,13 +756,11 @@ Options:
 Mixed: `Outcome` is `[D]` (defines what success looks like — pure problem framing); `Levels` is `[S]` (audience-handling strategy — how to structure delivery). With a frame brief, ask only `Levels`; the outcome should be settled.
 
 Ask the user: "What should the learner be able to DO after this module — not just know?"
-Header: "Outcome"
 Options:
 - "⭐ Recommended: Build a working prototype" (description: "Learner produces a functional artifact using the techniques taught. · Strength: Forces genuine skill transfer — the artifact proves competence. Matches the 'Innovate' lesson format from 10xDevs3. · Tradeoff: Requires well-designed starter templates and clear acceptance criteria; takes 2-3x longer to prep.")
 - "Complete a guided exercise" (description: "Step-by-step walkthrough with expected output. · Strength: Low barrier — everyone finishes, builds confidence. · Tradeoff: May produce 'tutorial zombies' who can follow but not apply independently.")
 - "Pass a knowledge check" (description: "Quiz or code review proving conceptual understanding. · Strength: Fast to create, easy to grade at scale. · Tradeoff: Tests recognition not production — learner may understand but not be able to execute.")
 Ask the user: "How should this module handle different skill levels in the audience?"
-Header: "Levels"
 Options:
 - "Single track, advanced" (description: "One path targeting experienced devs. · Strength: Deep content, no hand-holding, respects expert time. · Tradeoff: Alienates beginners — they'll drop off or flood support channels.")
 - "⭐ Recommended: Layered depth" (description: "Core path everyone follows + optional deep-dive sections. · Strength: Everyone gets value; advanced learners self-select into harder material. · Tradeoff: More content to maintain; risk of 'optional' sections being ignored.")
@@ -779,7 +771,6 @@ Options:
 `Bottleneck` is `[D]` — pure problem framing (which problem to solve). This is exactly the kind of question a frame exists to settle. With a frame brief, skip this entirely; the leading hypothesis is the bottleneck.
 
 Ask the user: "What's the primary bottleneck in the current newsletter pipeline?"
-Header: "Bottleneck"
 Options:
 - "⭐ Recommended: Curation takes too long" (description: "Finding and evaluating links is the slow step. · Strength: Directly targets time-to-publish — automating curation yields the biggest time savings based on current pipeline timings. · Tradeoff: Automated curation risks losing the personal editorial voice that subscribers value.")
 - "Writing the commentary" (description: "Links are ready but writing around them is slow. · Strength: AI-assisted drafting can cut this in half. · Tradeoff: Heavy AI drafting can make the newsletter feel generic — needs careful voice calibration.")
