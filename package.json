@@ -3,6 +3,8 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
@@ -42,6 +44,9 @@
   "devDependencies": {
     "@eslint/compat": "^2.0.3",
     "@eslint/js": "^9.29.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^22.20.2",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-astro": "^1.7.0",
@@ -51,6 +56,7 @@
     "eslint-plugin-react-compiler": "^19.1.0-rc.2",
     "eslint-plugin-react-hooks": "^7.1.1",
     "husky": "9.1.7",
+    "jsdom": "^26.1.0",
     "lint-staged": "^16.3.3",
     "prettier": "^3.8.3",
     "prettier-plugin-astro": "0.14.1",
@@ -58,6 +64,7 @@
     "supabase": "^2.23.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.59.2",
+    "vitest": "^4.1.11",
     "wrangler": "^4.90.0"
   },
   "overrides": {

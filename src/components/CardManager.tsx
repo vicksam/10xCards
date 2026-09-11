@@ -496,16 +496,16 @@ export default function CardManager({ initialCards = [], initialCount = 0 }: Car
           )}
 
           {deletingCard && (
-            <div className="max-h-60 min-w-0 max-w-full overflow-y-auto rounded-lg border border-white/10 bg-white/5 p-3.5 text-sm text-slate-300">
+            <div className="max-h-60 max-w-full min-w-0 overflow-y-auto rounded-lg border border-white/10 bg-white/5 p-3.5 text-sm text-slate-300">
               <div>
-                <span className="text-[10px] font-semibold tracking-wider uppercase text-purple-300/80">Front</span>
-                <p className="mt-0.5 font-medium text-white break-words whitespace-pre-wrap [overflow-wrap:anywhere]">
+                <span className="text-[10px] font-semibold tracking-wider text-purple-300/80 uppercase">Front</span>
+                <p className="mt-0.5 font-medium [overflow-wrap:anywhere] break-words whitespace-pre-wrap text-white">
                   {deletingCard.front}
                 </p>
               </div>
               <div className="mt-3 border-t border-white/5 pt-2.5">
-                <span className="text-[10px] font-semibold tracking-wider uppercase text-slate-400/80">Back</span>
-                <p className="mt-0.5 text-xs text-slate-300 break-words whitespace-pre-wrap [overflow-wrap:anywhere]">
+                <span className="text-[10px] font-semibold tracking-wider text-slate-400/80 uppercase">Back</span>
+                <p className="mt-0.5 text-xs [overflow-wrap:anywhere] break-words whitespace-pre-wrap text-slate-300">
                   {deletingCard.back}
                 </p>
               </div>

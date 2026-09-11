@@ -1,7 +1,7 @@
 ---
 change_id: testing-bootstrap-critical-path
 title: Bootstrap critical-path test coverage per test plan phase 1
-status: planned
+status: implementing
 created: 2026-09-10
 updated: 2026-09-11
 archived_at: null
