@@ -25,7 +25,7 @@ Rules:
 /**
  * Strips optional outer Markdown code fence (e.g. ```json ... ``` or ``` ... ```).
  */
-function cleanJsonString(content: string): string {
+export function cleanJsonString(content: string): string {
   const trimmed = content.trim();
   if (trimmed.startsWith("```")) {
     const lines = trimmed.split("\n");
