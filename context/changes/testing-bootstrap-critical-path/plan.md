@@ -311,6 +311,6 @@ Run the full suite, fix any failures, then fill in `test-plan.md §6.1` with the
 ## Progress
 
 - [x] Phase 1 — Bootstrap vitest (install + config + mock files + scripts) — bc53782
-- [x] Phase 2 — R1: `test/lib/services/ai-generation.test.ts` (all 8 parsing cases)
-- [ ] Phase 3 — R4: `test/components/hooks/useFlashcardGeneration.test.ts` (helpers + tiers + Mode B)
+- [x] Phase 2 — R1: `test/lib/services/ai-generation.test.ts` (all 8 parsing cases) — 11cbd66
+- [x] Phase 3 — R4: `test/components/hooks/useFlashcardGeneration.test.ts` (helpers + tiers + Mode B)
 - [ ] Phase 4 — Green run + test-plan §6.1 cookbook + status to complete

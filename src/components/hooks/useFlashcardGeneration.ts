@@ -7,11 +7,11 @@ export type GenerationState =
   | { status: "success"; generationId: string | null; candidates: CandidateCard[] }
   | { status: "error"; message: string; lastAttemptTimeout?: number };
 
-function isRetryableStatus(status: number): boolean {
+export function isRetryableStatus(status: number): boolean {
   return status === 408 || status === 429 || (status >= 500 && status <= 599);
 }
 
-function isAbortReasonCancel(controller: AbortController | null, err: unknown): boolean {
+export function isAbortReasonCancel(controller: AbortController | null, err: unknown): boolean {
   if (err === "CANCEL") return true;
   if (!controller) return false;
   const signal: unknown = controller.signal;
