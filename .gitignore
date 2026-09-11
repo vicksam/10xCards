@@ -29,3 +29,8 @@ pnpm-debug.log*
 
 # supabase local dev artifacts
 supabase/snippets/
+
+# playwright
+playwright/.auth/
+.playwright-cli/
+
