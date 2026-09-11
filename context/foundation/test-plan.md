@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-09-10
+> Last updated: 2026-09-11
 
 ---
 
@@ -56,7 +56,7 @@ research's job, see §1 principle #3).
 | Risk | What would prove protection | Must challenge | Context `/10x-research` must ground | Likely cheapest layer | Anti-pattern to avoid |
 |---|---|---|---|---|---|
 | R1 | Given known-bad payloads (null content, bare array, fenced JSON, >15 cards, over-limit front/back), the service returns a clean candidate list or throws a typed error — never a silent empty result from valid content | "The code has branches for each case" — verify each branch with real fixture payloads, not just the happy-path JSON | Exact parsing branches and the error-throw vs. empty-return decision; what happens when JSON.parse fails | Unit (pure function, no network) | Testing only the happy-path JSON; asserting output matches the implementation's output instead of the PRD's contract |
-| R2 | When the finalize RPC fails, the UI shows a visible error with retry and discard options — the user is never left with accepted cards silently lost | "The error state is set so it works" — simulate RPC failure and verify the UI transition, not just the state variable | How the review hook handles save errors; what UI elements appear on error; whether retry reinvokes the same call | Integration (hook + mocked API) | Asserting the error state variable is set without verifying the rendered error message and retry option appear |
+| R2 | When the finalize RPC fails, the UI shows a visible error with retry and discard options — the user is never left with accepted cards silently lost | "The error state is set so it works" — simulate RPC failure and verify the UI transition, not just the state variable | How the review hook handles save errors; what UI elements appear on error; whether retry reinvokes the same call | e2e (Playwright) — elevated from integration per explicit user direction (critical-path full-stack confidence) | Asserting the error state variable is set without verifying the rendered error message and retry option appear |
 | R3 | KPI queries exclude unfinalized rows from acceptance-rate denominators — orphaned rows do not corrupt stats over time | "Cancel button covers cleanup" — S-04 cancel only fires during loading, not review-phase abandonment | Lifecycle of unfinalized rows; whether KPI queries filter on finalized_at; whether any cleanup path exists for review-phase abandonment | Integration for KPI exclusion check; research must determine if review-phase abandon has any cleanup | Testing only the cancel-during-loading path and assuming it covers tab-close during review |
 | R4 | Three distinct behaviors must be verifiable: (1) on a 408/429/5xx on attempt 1, retry fires with the 45s timeout and actually waits that long before resolving; (2) a 4xx fails immediately without retry; (3) a manual retry uses the 60s timeout and waits — it does not return an error immediately. Mode A (resolves in ~12s during the 30s→45s window) means the timeout tier is not being applied or a premature-success/failure signal is leaking. Mode B (instant failure on 60s manual retry) means the retry path is short-circuiting. Both must be exposed by controlled timing assertions | "The code says it retries so it does" — Q2 burn + 2026-09-10 observation shows the state machine is unpredictable in both directions (too fast AND immediate fail); verify the actual elapsed time and status per attempt, not just that fetch was called | How AbortController is instantiated per attempt vs. shared; what triggers Mode A early resolution; what causes Mode B immediate failure on the 60s path; whether a stale cancelled signal is reused across retries | Unit (mock fetch, control response codes, mock timers to assert elapsed per attempt) | Asserting fetch was called twice without verifying the correct timeout duration elapsed each time; testing only the happy-path retry without covering the 60s manual-retry immediate-failure path |
 | R6 | User B cannot finalize or delete User A's generation ID, even with a valid UUID — the call returns an error or affects zero rows | "RLS protects this" — the finalize function is security-definer and bypasses RLS; the ownership check is inside the function body and must be verified independently of the policy | Exact ownership predicate inside the finalize function; whether the DELETE endpoint adds its own user_id filter beyond RLS | Integration (two test users, cross-ownership call, verify rejection) | Testing only that the RLS policy exists, not that a cross-user call is actually blocked end-to-end |
@@ -98,9 +98,9 @@ The classic test base for this project. AI-native tools (if any) carry a
 
 | Layer | Tool | Version | Notes |
 |---|---|---|---|
-| unit + integration | Vitest | latest stable | Not yet installed — see §3 Phase 1. Compatible with Cloudflare Workers via `@cloudflare/vitest-pool-workers` or standard jsdom/node pool for pure-function and hook tests |
-| API mocking | MSW (Mock Service Worker) | latest stable | Not yet installed — see §3 Phase 2. Recommended for mocking fetch at the network edge in hook integration tests |
-| e2e | none yet | — | No e2e tooling planned in current rollout; Cloudflare Workers e2e complexity is high relative to signal for these risks |
+| unit + integration | Vitest | ^4.1.11 | Installed (shipped in Phase 1). Tests in `test/` running with `vitest run`. Compatible with Cloudflare Workers |
+| API mocking | MSW (Mock Service Worker) | latest stable | Not yet installed. Recommended for mocking fetch at the network edge in hook integration tests |
+| e2e | Playwright (`@playwright/test`) | ^1.63.0 | Installed; required for Phase 2 e2e test covering R2 (finalization failure error path) |
 | AI-native | none | — | No AI-native test layer justified under cost × signal for current risk map |
 
 **Stack grounding tools (current session):**
@@ -109,7 +109,7 @@ The classic test base for this project. AI-native tools (if any) carry a
 - Runtime/browser: no Playwright MCP in session — not available; not used
 - Provider/platform: Cloudflare MCP — available (Cloudflare Workers stack); Supabase — no MCP in session; not used for quality-gate purposes in current session
 
-No test runner config exists in the project today (`package.json` has no `test` script; no `vitest.config.*`, `jest.config.*`, or `playwright.config.*` found). Test-base profile: **none** — Phase 1 bootstraps the runner.
+Test runner bootstrapped (`vitest` installed and unit tests present in `test/`; `@playwright/test` installed). Test-base profile: **sparse** (Phase 1 complete).
 
 ---
 
@@ -124,7 +124,7 @@ phase lands; before that, the gate is planned.
 | lint + typecheck | local + CI (already wired in `.github/workflows/ci.yml`) | required (already active) | syntactic / type drift |
 | unit + integration | local + CI | required after §3 Phase 1 | logic regressions in parsing, retry, finalization, ownership |
 | post-edit hook | local (agent loop) | recommended after §3 Phase 4 | regressions at edit time |
-| e2e on critical flows | CI on PR | not planned for current rollout | broken critical user paths — deferred; integration layer covers the critical risk surface |
+| e2e on critical flows | CI on PR | required after §3 Phase 2 | broken critical user paths (R2 finalization failure error path) |
 | visual diff / snapshot | CI on PR | not planned | rendering regressions — excluded per §7 (look-and-feel budget exclusion) |
 | pre-prod smoke | between merge + prod | optional / manual | environment-specific failures; currently covered by manual verification steps in archived plans |
 
@@ -187,9 +187,9 @@ contributors should respect these unless the underlying assumption changes.
 
 ## 8. Freshness Ledger
 
-- Strategy (§1–§5) last reviewed: 2026-09-10 (R4 sharpened with two observed failure modes — Mode A and Mode B — from user, 2026-09-10)
-- Stack versions last verified: 2026-09-10
-- AI-native tool references last verified: 2026-09-10 (none in use)
+- Strategy (§1–§5) last reviewed: 2026-09-11 (R2 elevated to e2e Playwright per explicit user direction; Phase 1 complete; test-base profile updated to sparse)
+- Stack versions last verified: 2026-09-11
+- AI-native tool references last verified: 2026-09-11 (none in use)
 
 Refresh (`/10x-test-plan --refresh`) when:
 
