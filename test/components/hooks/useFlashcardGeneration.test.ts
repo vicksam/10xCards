@@ -12,7 +12,8 @@ function mockHangingFetch() {
     return new Promise<Response>((_resolve, reject) => {
       if (options?.signal) {
         if (options.signal.aborted) {
-          return reject(new DOMException("The operation was aborted.", "AbortError"));
+          reject(new DOMException("The operation was aborted.", "AbortError"));
+          return;
         }
         options.signal.addEventListener("abort", () => {
           reject(new DOMException("The operation was aborted.", "AbortError"));
@@ -179,33 +180,30 @@ describe("useFlashcardGeneration — timeout tier state machine", () => {
   });
 
   describe("Attempt 1 → Attempt 2 path (retryable HTTP error on attempt 1)", () => {
-    it.each([408, 429, 500])(
-      "triggers attempt 2 when attempt 1 returns %i",
-      async (status) => {
-        let callCount = 0;
-        global.fetch = vi.fn(() => {
-          callCount++;
-          if (callCount === 1) {
-            return Promise.resolve(mockJsonResponse({ error: "Temporary issue" }, status));
-          }
-          return Promise.resolve(
-            mockJsonResponse({
-              generationId: "gen-retry",
-              candidates: [{ front: "Retry Q", back: "Retry A" }],
-            }),
-          );
-        });
+    it.each([408, 429, 500])("triggers attempt 2 when attempt 1 returns %i", async (status) => {
+      let callCount = 0;
+      global.fetch = vi.fn(() => {
+        callCount++;
+        if (callCount === 1) {
+          return Promise.resolve(mockJsonResponse({ error: "Temporary issue" }, status));
+        }
+        return Promise.resolve(
+          mockJsonResponse({
+            generationId: "gen-retry",
+            candidates: [{ front: "Retry Q", back: "Retry A" }],
+          }),
+        );
+      });
 
-        const { result } = renderHook(() => useFlashcardGeneration());
+      const { result } = renderHook(() => useFlashcardGeneration());
 
-        await act(async () => {
-          await result.current.generate("study text");
-        });
+      await act(async () => {
+        await result.current.generate("study text");
+      });
 
-        expect(callCount).toBe(2);
-        expect(result.current.state.status).toBe("success");
-      },
-    );
+      expect(callCount).toBe(2);
+      expect(result.current.state.status).toBe("success");
+    });
 
     it('stays "loading" through attempt 2 when attempt 1 returns 503', async () => {
       let callCount = 0;
@@ -239,11 +237,9 @@ describe("useFlashcardGeneration — timeout tier state machine", () => {
 
   describe("Immediate fail — non-retryable HTTP error", () => {
     it.each([400, 401, 403, 404])(
-      "transitions to \"error\" immediately (no attempt 2) when attempt 1 returns %i",
+      'transitions to "error" immediately (no attempt 2) when attempt 1 returns %i',
       async (status) => {
-        const fetchMock = vi.fn().mockResolvedValue(
-          mockJsonResponse({ error: `Client error ${status}` }, status),
-        );
+        const fetchMock = vi.fn().mockResolvedValue(mockJsonResponse({ error: `Client error ${status}` }, status));
         global.fetch = fetchMock;
 
         const { result } = renderHook(() => useFlashcardGeneration());
@@ -258,9 +254,7 @@ describe("useFlashcardGeneration — timeout tier state machine", () => {
     );
 
     it("sets lastAttemptTimeout=30 on immediate non-retryable fail", async () => {
-      global.fetch = vi.fn().mockResolvedValue(
-        mockJsonResponse({ error: "Bad request" }, 400),
-      );
+      global.fetch = vi.fn().mockResolvedValue(mockJsonResponse({ error: "Bad request" }, 400));
 
       const { result } = renderHook(() => useFlashcardGeneration());
 
@@ -277,9 +271,7 @@ describe("useFlashcardGeneration — timeout tier state machine", () => {
 
   describe("Manual retry path (60s timeout)", () => {
     it('uses 60s timeout when called with state.status === "error" (isManual=true)', async () => {
-      global.fetch = vi.fn().mockResolvedValueOnce(
-        mockJsonResponse({ error: "Failed" }, 400),
-      );
+      global.fetch = vi.fn().mockResolvedValueOnce(mockJsonResponse({ error: "Failed" }, 400));
 
       const { result } = renderHook(() => useFlashcardGeneration());
 
@@ -334,7 +326,7 @@ describe("useFlashcardGeneration — timeout tier state machine", () => {
       }
     });
 
-    it("transitions to \"success\" if 60s attempt resolves before timeout", async () => {
+    it('transitions to "success" if 60s attempt resolves before timeout', async () => {
       global.fetch = vi.fn().mockResolvedValue(
         mockJsonResponse({
           generationId: "gen-60",
@@ -358,9 +350,7 @@ describe("useFlashcardGeneration — timeout tier state machine", () => {
     // If this test passes green, the bug is not present; keep as regression guard.
     it('routes to 60s timeout on second generate() call when state.status is "error"', async () => {
       // Step 1: initial call fails immediately with 400
-      global.fetch = vi.fn().mockResolvedValueOnce(
-        mockJsonResponse({ error: "Client error" }, 400),
-      );
+      global.fetch = vi.fn().mockResolvedValueOnce(mockJsonResponse({ error: "Client error" }, 400));
 
       const { result } = renderHook(() => useFlashcardGeneration());
 

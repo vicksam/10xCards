@@ -73,7 +73,7 @@ orchestrator updates Status as artifacts appear on disk.
 
 | # | Phase name | Goal (one line) | Risks covered | Test types | Status | Change folder |
 |---|---|---|---|---|---|---|
-| 1 | Bootstrap + critical-path unit | Install vitest and cover LLM parsing and retry state machine — highest signal at zero infrastructure cost | R1, R4 | unit | implementing | testing-bootstrap-critical-path |
+| 1 | Bootstrap + critical-path unit | Install vitest and cover LLM parsing and retry state machine — highest signal at zero infrastructure cost | R1, R4 | unit | complete | testing-bootstrap-critical-path |
 | 2 | Integration — data integrity & error paths | Cover finalization failure surfacing, orphaned-row KPI impact, and text leakage on error paths | R2, R3, R7 | integration (mocked Supabase + API) | not started | — |
 | 3 | Integration — ownership & auth boundaries | Cover IDOR on generation review and auth-expiry surfacing during study | R5, R6 | integration (two test users, simulated expired session) | not started | — |
 | 4 | Quality-gates wiring | Add `npm test` script; lock vitest + lint + typecheck in CI | — (floor) | gate config | not started | — |
@@ -138,7 +138,22 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.1 Adding a unit test (pure function or hook)
 
-TBD — see §3 Phase 1 for the LLM parsing and retry state machine unit test patterns.
+**File location**: `test/` mirroring `src/` hierarchy.
+e.g. `src/lib/services/foo.ts` → `test/lib/services/foo.test.ts`
+
+**Environment**:
+- Pure functions (no DOM): default `node` pool — no docblock needed.
+- React hooks: add `// @vitest-environment jsdom` as first line of the test file.
+
+**Mock patterns established in Phase 1:**
+- `astro:env/server`: aliased globally in `vitest.config.ts` → `src/__mocks__/astro-env-server.ts`. No per-test mock needed.
+- OpenAI SDK: `vi.mock('openai')` at top of file; configure `chat.completions.create` per test with `vi.mocked(...).mockResolvedValueOnce(...)`.
+- `fetch`: `global.fetch = vi.fn()` in `beforeEach`; configure per test with `.mockResolvedValueOnce(new Response(...))`.
+- Timers: `vi.useFakeTimers()` / `vi.useRealTimers()` in `beforeEach` / `afterEach`; advance with `await act(() => vi.advanceTimersByTimeAsync(ms))`.
+
+**Oracle rule**: assertion values come from PRD, archived plans, or explicit spec — never from reading the implementation output and asserting it back.
+
+**Fixture convention**: inline fixtures (string literals) for parsing tests; no fixture files needed for Phase 1 scope.
 
 ### 6.2 Adding an integration test (API route or hook + mocked network)
 
