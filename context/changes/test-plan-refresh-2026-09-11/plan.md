@@ -49,4 +49,4 @@ A refreshed `test-plan.md` that correctly reflects the current state of the code
 ## Progress
 
 - [x] Phase 1: Update Strategy & Risk Map — 4ca3f94
-- [x] Phase 2: Restructure Phased Rollout
+- [x] Phase 2: Restructure Phased Rollout — 34364da
