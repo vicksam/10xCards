@@ -69,13 +69,13 @@ When this skill is invoked, dispatch BEFORE doing any decomposition work:
 
 ## Interactive prompts — host-agnostic
 
-Whenever the procedure says *"ask the user"*, use whatever structured interactive-question tool the host agent exposes. If none is available, fall back to a plain conversational message listing the labelled options — do not block the procedure. State which tool you selected (or that you fell back to plain chat) the first time you ask, so the user can correct you.
+Whenever the procedure says *"ask the user"*, use whatever structured interactive-question tool the host agent exposes (on other hosts, any tool that asks the user a question with labelled options). If none is available, fall back to a plain conversational message listing the labelled options — do not block the procedure. State which tool you selected (or that you fell back to plain chat) the first time you ask, so the user can correct you.
 
 Question blocks appear in Steps 1, 3, 4, 5, and 9 and in the milestone transitions of `references/milestone-state.md` — short structured choices. Step 5 asks each anchor as its own structured question; its synthesis recap is plain markdown (no extra question).
 
 ## Parallel baseline research — host-agnostic
 
-Whenever the procedure says to use subagents or run parallel probes, use whatever background-research / task-spawn tool the host exposes, fanning the probes out in one batched call. If none exists, run the same probes sequentially in the main context. Either path must return the same baseline summary shape with file evidence.
+Whenever the procedure says to use subagents or run parallel probes, use whatever background-research / task-spawn tool the host exposes (on other hosts, any tool that spawns an isolated agent and returns a summary), fanning the probes out in one batched call. If none exists, run the same probes sequentially in the main context. Either path must return the same baseline summary shape with file evidence.
 
 ## Process
 
@@ -83,19 +83,16 @@ Whenever the procedure says to use subagents or run parallel probes, use whateve
 
 **When opening a milestone** (first launch or next-milestone transition from `references/milestone-state.md`), ask what the milestone should be built from — do not assume, but Recommend the PRD:
 
-Ask the user:
-- question: "What are the source materials for this milestone?"
-  header: "Sources"
-  options:
-  - label: "PRD at context/foundation/prd.md (Recommended)"
-    description: "The standard path: milestone scoped from the PRD's FRs and user stories. Run /10x-prd first if it doesn't exist yet."
-  - label: "Other document(s) — I'll give paths"
-    description: "Specs, briefs, research docs. Slices will trace to their content, recorded as scope anchors in the milestone charter."
-  - label: "I'll describe the milestone myself"
-    description: "Free-form description, no document. I'll distill it into MS-NN scope anchors that slices trace to."
-  - label: "Cancel"
-    description: "Exit without changes."
-  multiSelect: false
+Ask the user: "What are the source materials for this milestone?"
+Options:
+- PRD at context/foundation/prd.md (Recommended)
+  Description: The standard path: milestone scoped from the PRD's FRs and user stories. Run /10x-prd first if it doesn't exist yet.
+- Other document(s) — I'll give paths
+  Description: Specs, briefs, research docs. Slices will trace to their content, recorded as scope anchors in the milestone charter.
+- I'll describe the milestone myself
+  Description: Free-form description, no document. I'll distill it into MS-NN scope anchors that slices trace to.
+- Cancel
+  Description: Exit without changes.
 
 For subsequent milestones, `references/milestone-state.md` refines these options (updated PRD vs next tranche of the same PRD). When the invocation carried an explicit path argument, skip the question and use that path.
 
@@ -107,18 +104,16 @@ test -f "<resolved-path>"
 
 If a file exists, **read it FULLY** (no `limit`/`offset`). If the user chose self-description, capture their description verbatim instead — it becomes the `## Milestone` charter with numbered `MS-NN` scope anchors, and Steps 3's PRD-readiness check is replaced by an anchor check (< 2 distillable `MS-NN` anchors → ask the user to firm up the description, then STOP if they can't).
 
-If a named file does not exist, ask the user:
+If a named file does not exist, ask with the selected interactive-question tool:
 
-- question: "No source found at `<resolved-path>`. How would you like to proceed?"
-  header: "Input?"
-  options:
-  - label: "Run /10x-prd first (Recommended)"
-    description: "Stop here. Run /10x-prd to produce prd.md, then re-invoke /10x-roadmap."
-  - label: "Provide a different path"
-    description: "I'll wait for you to give me the path."
-  - label: "Cancel"
-    description: "Exit without changes."
-  multiSelect: false
+Ask the user: "No source found at `<resolved-path>`. How would you like to proceed?"
+Options:
+- Run /10x-prd first (Recommended)
+  Description: Stop here. Run /10x-prd to produce prd.md, then re-invoke /10x-roadmap.
+- Provide a different path
+  Description: I'll wait for you to give me the path.
+- Cancel
+  Description: Exit without changes.
 
 On "Run /10x-prd first": print the redirect message and STOP.
 
@@ -169,18 +164,16 @@ state — the roadmap surfaces what's blocking — but if you have time to firm
 up the PRD first, the resulting roadmap will be substantially more actionable.
 ```
 
-Then ask the user:
+Then ask with the selected interactive-question tool:
 
-- question: "How would you like to proceed?"
-  header: "Thin PRD"
-  options:
-  - label: "Firm up PRD first (Recommended)"
-    description: "Stop here. Resolve PRD's Open Questions / TODOs, then re-invoke /10x-roadmap."
-  - label: "Proceed anyway"
-    description: "Generate from what's there. Hollow areas surface as blocked slices with PRD gap as their Unknown."
-  - label: "Cancel"
-    description: "Exit without changes."
-  multiSelect: false
+Ask the user: "How would you like to proceed?"
+Options:
+- Firm up PRD first (Recommended)
+  Description: Stop here. Resolve PRD's Open Questions / TODOs, then re-invoke /10x-roadmap.
+- Proceed anyway
+  Description: Generate from what's there. Hollow areas surface as blocked slices with PRD gap as their Unknown.
+- Cancel
+  Description: Exit without changes.
 
 On "Firm up PRD first": print the redirect and STOP. On "Proceed anyway": continue with the score recorded so Step 6 can flag thin areas.
 
@@ -191,7 +184,7 @@ The "what's already in place" assessment shouldn't fall on the user — the code
 **Layers to probe** (skip a layer if `tech-stack.md` already names that layer's choice — report "per tech-stack.md: <choice>" instead of probing):
 
 | Layer | What the probe looks for |
-| --- | --- |
+|---|---|
 | Frontend | UI framework, build tooling, routing, component libraries — `package.json` deps, framework config files |
 | Backend / API | Server framework, API routes, request handlers — entrypoints, route files, controllers |
 | Data | DB driver, ORM/query builder, schema/migration tooling, seeded data — schema files, migration directories |
@@ -220,17 +213,14 @@ Codebase baseline (auto-researched):
 
 Then confirm:
 
-Ask the user:
-- question: "Does this baseline match your understanding? Anything to correct or add before it informs Foundations?"
-  header: "Baseline"
-  options:
-  - label: "Looks right — proceed"
-    description: "Use this baseline as input for Foundations and the roadmap's ## Baseline section."
-  - label: "Correct one or more layers — I'll explain"
-    description: "Free-form correction. I'll re-record the layer(s) before proceeding."
-  - label: "Add something not listed"
-    description: "Free-form. Things the probes missed (planned-but-not-wired, scaffold from another repo, etc.)."
-  multiSelect: true
+Ask the user: "Does this baseline match your understanding? Anything to correct or add before it informs Foundations?"
+Options:
+- Looks right — proceed
+  Description: Use this baseline as input for Foundations and the roadmap's ## Baseline section.
+- Correct one or more layers — I'll explain
+  Description: Free-form correction. I'll re-record the layer(s) before proceeding.
+- Add something not listed
+  Description: Free-form. Things the probes missed (planned-but-not-wired, scaffold from another repo, etc.).
 
 Save the confirmed baseline. It feeds Step 6a (Foundations) directly: **present** layers → Foundations skips them; **absent** or **partial** → Foundations slot opens. It also feeds the roadmap's `## Baseline` section verbatim.
 
@@ -256,19 +246,16 @@ For each anchor below, derive *both* the Recommend AND the alternatives — grou
 
 For each non-skipped anchor — `main_goal`, then `north_star`, then `top_blocker` — use the selected interactive-question tool. Each question is its own call (sequential, not batched). Format:
 
-Ask the user:
-- question: "<plain-language anchor question, in the user's language>"
-  header: "<short header — e.g., Cel | Gwiazda | Główne ryzyko / Goal | North star | Blocker>"
-  options:
-  - label: "<Recommend value> (Recommended)"
-    description: "<One-line why, with the artifact quote/pointer that grounds the Recommend.>"
-  - label: "<Alternative A value>"
-    description: "Reasonable when <one-line condition the artifacts partially support>; you'd pick this when <sequencing/scope consequence>."
-  - label: "<Alternative B value>"
-    description: "Reasonable when <one-line condition>; you'd pick this when <consequence>."
-  - label: "Something else — I'll explain"
-    description: "Free-form. Name the value and the reason; I'll record both and sequence accordingly."
-  multiSelect: false
+Ask the user: "<plain-language anchor question, in the user's language>"
+Options:
+- <Recommend value> (Recommended)
+  Description: <One-line why, with the artifact quote/pointer that grounds the Recommend.>
+- <Alternative A value>
+  Description: Reasonable when <one-line condition the artifacts partially support>; you'd pick this when <sequencing/scope consequence>.
+- <Alternative B value>
+  Description: Reasonable when <one-line condition>; you'd pick this when <consequence>.
+- Something else — I'll explain
+  Description: Free-form. Name the value and the reason; I'll record both and sequence accordingly.
 
 Rules for the options block:
 - **The Recommend is always option 1**, with the "(Recommended)" suffix on the label.
@@ -469,7 +456,7 @@ be able to read the section cold.>
 ## At a glance
 
 | ID | Change ID | Outcome (user can …) | Prerequisites | PRD refs | Status |
-| --- | --- | --- | --- | --- | --- |
+|---|---|---|---|---|---|
 | F-01 | <kebab-case-change-id> | (foundation) <foundation outcome> | — | NFR-XX | proposed |
 | F-02 | <kebab-case-change-id> | (foundation) <foundation outcome> | F-01 | NFR-YY | proposed |
 | S-01 | <kebab-case-change-id> | <user-can outcome> | F-01 | US-01, FR-001 | ready |
@@ -481,7 +468,7 @@ be able to read the section cold.>
 Navigation aid — groups items that share a Prerequisites chain. Canonical ordering still lives in the dependency graph below; this table is the proposed reading order across parallel tracks.
 
 | Stream | Theme | Chain | Note |
-| --- | --- | --- | --- |
+|---|---|---|---|
 | A | <Theme> | `F-01` → `S-01` → `S-02` | <One-line rationale tying the stream to main_goal.> |
 | B | <Theme> | `F-02` → `S-03` | <Joins Stream A at `S-NN` if applicable, else standalone.> |
 | C | <Theme> | `S-NN` | <Standalone slice with no foundation prerequisite.> |
@@ -538,7 +525,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 ## Backlog Handoff
 
 | Roadmap ID | Change ID | Suggested issue title | Ready for `/10x-plan` | Notes |
-| --- | --- | --- | --- | --- |
+|---|---|---|---|---|
 | F-01 | <kebab-case-change-id> | <issue title for Jira/Linear> | no | <why or `—`> |
 | S-01 | <kebab-case-change-id> | <issue title for Jira/Linear> | yes | Run `/10x-plan <change-id>` |
 
@@ -574,7 +561,7 @@ This table is the clean handoff to Jira/Linear or any MCP-backed backlog. Includ
 - **Outcome** is verb-led. Slices: *"user can sign in and see an empty fridge"*. Foundations: *"(foundation) auth scaffold landed; tokens issued via configured provider"*. Never a noun phrase ("authentication system"); always a state-of-the-world declarative.
 - **Change ID** is kebab-case, stable, and suitable for `context/changes/<change-id>/`. Do not use `F-01` / `S-01` as the change id; those are roadmap-local order IDs.
 - **Unlocks** appears only on Foundations. It names the downstream reason this Foundation exists: specific `S-NN` slices, blocking unknowns, or verification paths. A Foundation without Unlocks is horizontal drift.
-- **PRD refs** uses the literal IDs from PRD (`FR-001`, `US-01`, `NFR-02`). Don't paraphrase. Every must-have FR in PRD must appear in at least one slice's PRD refs after Step 8 self-review.
+- **PRD refs** uses the literal IDs from PRD (`FR-001`, `US-01`, `NFR-02`). Don't paraphrase. Every must-have FR in PRD must appear in at least one slice's `PRD refs` after Step 8 self-review.
 - **Prerequisites** mixes slice IDs (`S-01`, `F-02`) and external state, comma-separated. External state is plain English ("seeded ingredient table", "design tokens published"). One field, not split.
 - **Parallel with** is informational. Computed from the dep graph: any slice X where my Prerequisites and X's Prerequisites have no path between them. Empty = `—`.
 - **Blockers** is *external pending* only (vendor, design, stakeholder decision). Things the team can't unilaterally resolve. If the team CAN resolve it, it's an Unknown, not a Blocker.
@@ -634,18 +621,16 @@ test -f context/foundation/roadmap.md
 
 If the file does not exist, write to `context/foundation/roadmap.md` and proceed to Step 10.
 
-If the file exists, the foundation-doc convention is **edit-in-place** for incremental refinement, **archive-then-replace** for full regeneration. This skill produces a *full* roadmap from PRD; surgical refinement is out of scope. So default to archive-then-replace, but ask the user:
+If the file exists, the foundation-doc convention is **edit-in-place** for incremental refinement, **archive-then-replace** for full regeneration. This skill produces a *full* roadmap from PRD; surgical refinement is out of scope. So default to archive-then-replace, but ask with the selected interactive-question tool:
 
-- question: "context/foundation/roadmap.md already exists. How would you like to proceed?"
-  header: "Collision"
-  options:
-  - label: "Archive and replace (Recommended)"
-    description: "Move existing to context/foundation/archive/<today>-roadmap.md, then write the new roadmap. History preserved per foundation README convention."
-  - label: "Overwrite without archiving"
-    description: "Replace in place. Existing content is lost (unless you've committed it). Use only if the existing roadmap is empty or scratch."
-  - label: "Cancel"
-    description: "Exit without writes. No collision resolution."
-  multiSelect: false
+Ask the user: "context/foundation/roadmap.md already exists. How would you like to proceed?"
+Options:
+- Archive and replace (Recommended)
+  Description: Move existing to context/foundation/archive/<today>-roadmap.md, then write the new roadmap. History preserved per foundation README convention.
+- Overwrite without archiving
+  Description: Replace in place. Existing content is lost (unless you've committed it). Use only if the existing roadmap is empty or scratch.
+- Cancel
+  Description: Exit without writes. No collision resolution.
 
 On "Archive and replace": create `context/foundation/archive/` if missing, move the existing file to `context/foundation/archive/<today>-roadmap-<milestone_id>.md` (today's date in `YYYY-MM-DD`; drop the `-<milestone_id>` suffix for legacy files without one), then write the new content. If a file already exists at that archive path (regenerated twice in one day), append `-2`, `-3`, etc.
 
