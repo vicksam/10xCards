@@ -30,12 +30,14 @@ A refreshed `test-plan.md` that correctly reflects the current state of the code
 ## Implementation Phases
 
 ### Phase 1: Update Strategy & Risk Map
+
 - Update §1 or §4 to reflect the new test-base profile: 'sparse'.
 - In §2 (Risk Map), update R2's "Likely cheapest layer" to `e2e (Playwright)` and note that this is explicit user direction superseding cost-signal guidance.
 - In §4 (Stack), add Playwright to the e2e row, noting it's required for Phase 2. Remove the "No e2e tooling planned" note.
 - Update §8 (Freshness Ledger) with today's date for strategy review.
 
 ### Phase 2: Restructure Phased Rollout
+
 - In §3 (Phased Rollout), mark Phase 1 as `complete`.
 - Split Phase 2 into two phases:
   - Phase 2: e2e — critical path finalization. Covers R2. Test type: e2e (Playwright). Status: not started.
@@ -46,5 +48,5 @@ A refreshed `test-plan.md` that correctly reflects the current state of the code
 
 ## Progress
 
-- [x] Phase 1: Update Strategy & Risk Map
-- [ ] Phase 2: Restructure Phased Rollout
+- [x] Phase 1: Update Strategy & Risk Map — 4ca3f94
+- [x] Phase 2: Restructure Phased Rollout
