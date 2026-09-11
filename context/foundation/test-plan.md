@@ -125,7 +125,7 @@ phase lands; before that, the gate is planned.
 | ---------------------- | -------------------------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------- |
 | lint + typecheck       | local + CI (already wired in `.github/workflows/ci.yml`) | required (already active)    | syntactic / type drift                                                                          |
 | unit + integration     | local + CI                                               | required after §3 Phase 1    | logic regressions in parsing, retry, finalization, ownership                                    |
-| post-edit hook         | local (agent loop)                                       | recommended after §3 Phase 4 | regressions at edit time                                                                        |
+| post-edit hook         | local (agent loop)                                       | recommended after §3 Phase 5 | regressions at edit time                                                                        |
 | e2e on critical flows  | CI on PR                                                 | required after §3 Phase 2    | broken critical user paths (R2 finalization failure error path)                                 |
 | visual diff / snapshot | CI on PR                                                 | not planned                  | rendering regressions — excluded per §7 (look-and-feel budget exclusion)                        |
 | pre-prod smoke         | between merge + prod                                     | optional / manual            | environment-specific failures; currently covered by manual verification steps in archived plans |
