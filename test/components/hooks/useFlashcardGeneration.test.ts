@@ -8,7 +8,7 @@ import {
 } from "@/components/hooks/useFlashcardGeneration";
 
 function mockHangingFetch() {
-  return vi.fn((_url: string, options?: { signal?: AbortSignal }) => {
+  return vi.fn((_url: RequestInfo | URL, options?: RequestInit) => {
     return new Promise<Response>((_resolve, reject) => {
       if (options?.signal) {
         if (options.signal.aborted) {
@@ -124,7 +124,7 @@ describe("useFlashcardGeneration — timeout tier state machine", () => {
 
     it('transitions to "success" if attempt 2 resolves before timeout', async () => {
       let callCount = 0;
-      global.fetch = vi.fn((_url: string, options?: { signal?: AbortSignal }) => {
+      global.fetch = vi.fn((_url: RequestInfo | URL, options?: RequestInit) => {
         callCount++;
         if (callCount === 1) {
           return new Promise<Response>((_resolve, reject) => {
@@ -207,7 +207,7 @@ describe("useFlashcardGeneration — timeout tier state machine", () => {
 
     it('stays "loading" through attempt 2 when attempt 1 returns 503', async () => {
       let callCount = 0;
-      global.fetch = vi.fn((_url: string, options?: { signal?: AbortSignal }) => {
+      global.fetch = vi.fn((_url: RequestInfo | URL, options?: RequestInit) => {
         callCount++;
         if (callCount === 1) {
           return Promise.resolve(mockJsonResponse({ error: "Unavailable" }, 503));

@@ -13,6 +13,7 @@
     "deploy:rollback": "wrangler rollback",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
     "format": "prettier --write ."
   },
   "dependencies": {
@@ -69,13 +70,5 @@
   },
   "overrides": {
     "vite": "^7.3.2"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,astro}": [
-      "eslint --fix"
-    ],
-    "*.{json,css,md}": [
-      "prettier --write"
-    ]
   }
 }
