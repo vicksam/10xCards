@@ -39,4 +39,4 @@ Implementing Phase 2 of the test rollout to cover Risk R2 (finalization failure)
 
 ## Progress
 - [x] Phase 1: Scaffold Playwright Infrastructure — fe2de65
-- [ ] Phase 2: Implement Finalization E2E Test (Risk R2)
+- [x] Phase 2: Implement Finalization E2E Test (Risk R2)

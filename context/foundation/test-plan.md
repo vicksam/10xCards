@@ -74,7 +74,7 @@ orchestrator updates Status as artifacts appear on disk.
 | #   | Phase name                                 | Goal (one line)                                                                                           | Risks covered | Test types                                              | Status      | Change folder                   |
 | --- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------- | ----------- | ------------------------------- |
 | 1   | Bootstrap + critical-path unit             | Install vitest and cover LLM parsing and retry state machine — highest signal at zero infrastructure cost | R1, R4        | unit                                                    | complete    | testing-bootstrap-critical-path |
-| 2   | e2e — critical path finalization           | Cover finalization failure surfacing with full-stack confidence                                           | R2            | e2e (Playwright)                                        | change opened | testing-e2e-critical-path-finalization |
+| 2   | e2e — critical path finalization           | Cover finalization failure surfacing with full-stack confidence                                           | R2            | e2e (Playwright)                                        | complete    | testing-e2e-critical-path-finalization |
 | 3   | Integration — data integrity & error paths | Cover orphaned-row KPI impact and text leakage on error paths                                             | R3, R7        | integration (mocked Supabase + API)                     | not started | —                               |
 | 4   | Integration — ownership & auth boundaries  | Cover IDOR on generation review and auth-expiry surfacing during study                                    | R5, R6        | integration (two test users, simulated expired session) | not started | —                               |
 | 5   | Quality-gates wiring                       | Add `npm test` script; lock vitest + lint + typecheck in CI                                               | — (floor)     | gate config                                             | not started | —                               |
@@ -161,7 +161,22 @@ e.g. `src/lib/services/foo.ts` → `test/lib/services/foo.test.ts`
 
 ### 6.2 Adding an e2e test (critical path full-stack)
 
-TBD — see §3 Phase 2 for the Playwright setup and finalization error path e2e test pattern.
+**File location**: `tests/e2e/` (e.g. `tests/e2e/seed.spec.ts`).
+
+**Runner**: Playwright (`@playwright/test`) configured in `playwright.config.ts`.
+- Command to run: `npx playwright test tests/e2e/<spec>.spec.ts`
+
+**Auth & Session pattern:**
+- Authenticated state is managed via `tests/e2e/auth.setup.ts` producing `playwright/.auth/user.json`.
+- The `chromium` project in `playwright.config.ts` depends on `setup` and injects `storageState: "playwright/.auth/user.json"`.
+
+**Mocking boundaries vs Real boundaries:**
+- Real: Authentication cookies, SSR page loading, React island hydration, client routing, DOM state transitions.
+- Mocked via `page.route()`: External LLM generation endpoints (`POST **/api/flashcards/generate`) to ensure zero token cost and fast deterministic runs; and backend RPC failure simulation (`POST **/api/flashcards`) to verify error recovery without corrupting live DB state.
+
+**Locators & Waiting discipline:**
+- Accessibility tree first: `getByRole`, `getByPlaceholder`, `getByText`.
+- Wait for state, never for time: `expect(...).toBeVisible()`, `page.waitForResponse(...)`. Strictly no `page.waitForTimeout()`.
 
 ### 6.3 Adding an integration test (API route or hook + mocked network)
 

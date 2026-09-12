@@ -14,11 +14,26 @@ setup("authenticate", async ({ page }) => {
   const password = process.env.TEST_USER_PASSWORD ?? "password123";
 
   await page.goto("/auth/signin");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Sign in" }).click();
+  const emailInput = page.getByLabel("Email");
+  const passwordInput = page.getByLabel("Password", { exact: true });
+  const signInButton = page.getByRole("button", { name: "Sign in" });
 
-  await page.waitForURL("/dashboard");
+  await expect(emailInput).toBeVisible();
+  await emailInput.click();
+  await emailInput.pressSequentially(email, { delay: 10 });
+  await passwordInput.click();
+  await passwordInput.pressSequentially(password, { delay: 10 });
+
+  await signInButton.click();
+
+  // If React hydrated mid-typing and caused validation to show, retry once
+  if (await page.getByText("Email is required").isVisible()) {
+    await emailInput.fill(email);
+    await passwordInput.fill(password);
+    await signInButton.click();
+  }
+
+  await page.waitForURL("/dashboard", { timeout: 15000 });
   await expect(page.getByRole("heading", { name: /generate flashcards with ai/i })).toBeVisible();
 
   await page.context().storageState({ path: authFile });
