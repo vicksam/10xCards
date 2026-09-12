@@ -33,4 +33,5 @@ supabase/snippets/
 # playwright
 playwright/.auth/
 .playwright-cli/
+test-results/
 
