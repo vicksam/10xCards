@@ -1,10 +1,10 @@
 ---
 change_id: testing-e2e-critical-path-finalization
 title: Testing e2e critical path finalization
-status: impl_reviewed
+status: archived
 created: 2026-09-12
 updated: 2026-09-12
-archived_at: null
+archived_at: 2026-09-12T20:45:24Z
 ---
 
 ## Notes
