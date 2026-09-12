@@ -34,4 +34,5 @@ supabase/snippets/
 playwright/.auth/
 .playwright-cli/
 test-results/
-
+playwright-report/
+blob-report/

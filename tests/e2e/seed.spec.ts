@@ -18,7 +18,8 @@ test.describe("Flashcard finalization failure recovery (Risk R2)", () => {
     const supabaseUrl = process.env.SUPABASE_URL ?? "http://127.0.0.1:54321";
     const supabaseKey = process.env.SUPABASE_KEY ?? "";
     const email = process.env.TEST_USER_EMAIL ?? "test@example.com";
-    const password = process.env.TEST_USER_PASSWORD ?? "password123";
+    const password = process.env.TEST_USER_PASSWORD;
+    if (!password) throw new Error("TEST_USER_PASSWORD environment variable is required");
 
     const supabase = createClient(supabaseUrl, supabaseKey);
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({

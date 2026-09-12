@@ -40,3 +40,7 @@ Implementing Phase 2 of the test rollout to cover Risk R2 (finalization failure)
 ## Progress
 - [x] Phase 1: Scaffold Playwright Infrastructure — fe2de65
 - [x] Phase 2: Implement Finalization E2E Test (Risk R2) — 0396772
+
+### Addendum: E2E Scope Expansion
+- **Supabase Client Usage**: The test utilizes the `@supabase/supabase-js` client directly to seed and verify database rows to ensure test isolation and direct state verification, bypassing the UI/API for setup.
+- **Endpoint Mocking**: The `**/api/flashcards/generate` endpoint is mocked to return predefined flashcard data instead of relying on real AI generation, improving test stability and speed.

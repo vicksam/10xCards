@@ -11,7 +11,8 @@ setup("authenticate", async ({ page }) => {
   }
 
   const email = process.env.TEST_USER_EMAIL ?? "test@example.com";
-  const password = process.env.TEST_USER_PASSWORD ?? "password123";
+  const password = process.env.TEST_USER_PASSWORD;
+  if (!password) throw new Error("TEST_USER_PASSWORD environment variable is required");
 
   await page.goto("/auth/signin");
   const emailInput = page.getByLabel("Email");
