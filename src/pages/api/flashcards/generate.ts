@@ -53,6 +53,23 @@ export const POST: APIRoute = async (context) => {
       return Response.json(emptyResponse, { status: 200 });
     }
 
+    // Clean up any unfinalized generation reviews for this user before creating a new one
+    try {
+      const { error: cleanupError } = await supabase
+        .from("generation_reviews")
+        .delete()
+        .eq("user_id", context.locals.user.id)
+        .is("finalized_at", null);
+
+      if (cleanupError) {
+        // eslint-disable-next-line no-console
+        console.error("[api/generate] Cleanup unfinalized generation_reviews error:", cleanupError);
+      }
+    } catch (cleanupErr) {
+      // eslint-disable-next-line no-console
+      console.error("[api/generate] Cleanup unfinalized generation_reviews exception:", cleanupErr);
+    }
+
     const { data, error } = await supabase
       .from("generation_reviews")
       .insert({
