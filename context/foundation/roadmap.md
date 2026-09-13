@@ -156,3 +156,4 @@ _None — all product-level decisions were locked during shaping (PRD §Open Que
 - **S-02: start a spaced repetition study session using an open-source scheduling algorithm; cards recalled easily appear later, cards recalled with difficulty appear sooner.** — Archived 2026-09-03 → `context/archive/2026-09-02-spaced-repetition-session/`. Lesson: —.
 - **S-03: user can manually create a flashcard (front + back) and view, edit, and delete their saved flashcards.** — Archived 2026-09-09 → `context/archive/2026-09-08-card-management/`. Lesson: —.
 - **S-04: user experiences progressive generation timeouts, reset a review session, and cancel card generation (stopping stat + db writes)** — Archived 2026-09-08 → `context/archive/2026-09-08-ux-improvements/`. Lesson: —.
+- **S-05: remove 10x-astro-starter boilerplate and personalize landing page** — Archived 2026-09-13 → `context/archive/2026-09-09-scaffold-cleanup/`. Lesson: —.
