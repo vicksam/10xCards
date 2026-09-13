@@ -50,3 +50,6 @@ Instead of failing silently, we will surface errors cleanly in the UI using exis
 - [x] Phase 1: Handle Cards Page Server Error — ac1ff3e
 - [x] Phase 2: Surface Generator Cancel Exceptions — fb047c7
 - [x] Phase 3: Synchronous Cleanup on Next Generation — 87d3787
+
+### Addendum 1: UI Improvements for Cancellation
+During implementation, it was identified that simply surfacing a cancellation error message was insufficient for a good user experience. Additional UI state was added to `src/components/FlashcardGenerator.tsx` to handle a dedicated cancellation retry flow (`handleRetryCancel`) and to show a success message upon clean cancellation.
