@@ -8,6 +8,7 @@ const supabase = createClient(Astro.request.headers, Astro.cookies);
 
 let initialCards: Flashcard[] = [];
 let initialCount = 0;
+let initialError: string | null = null;
 
 if (supabase && Astro.locals.user) {
   const { data, count, error } = await supabase
@@ -20,6 +21,7 @@ if (supabase && Astro.locals.user) {
   if (error) {
     // eslint-disable-next-line no-console
     console.error("Failed to pre-fetch flashcards:", error);
+    initialError = error.message || "Failed to pre-fetch flashcards";
   }
 
   initialCards = data ?? [];
@@ -30,7 +32,7 @@ if (supabase && Astro.locals.user) {
 <Layout title="My Cards - 10xCards">
   <main class="bg-cosmic min-h-screen p-4 sm:p-6 lg:p-8">
     <div class="mx-auto max-w-5xl pt-4 pb-12">
-      <CardManager initialCards={initialCards} initialCount={initialCount} client:load />
+      <CardManager initialCards={initialCards} initialCount={initialCount} initialError={initialError} client:load />
     </div>
   </main>
 </Layout>

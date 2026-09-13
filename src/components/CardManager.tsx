@@ -21,11 +21,12 @@ import type { Flashcard } from "@/types";
 interface CardManagerProps {
   initialCards?: Flashcard[];
   initialCount?: number;
+  initialError?: string | null;
 }
 
-export default function CardManager({ initialCards = [], initialCount = 0 }: CardManagerProps) {
+export default function CardManager({ initialCards = [], initialCount = 0, initialError = null }: CardManagerProps) {
   const { cards, count, isLoading, error, page, limit, setPage, fetchCards, createCard, updateCard, deleteCard } =
-    useCardManager(initialCards, initialCount, 1, 10);
+    useCardManager(initialCards, initialCount, 1, 10, initialError);
 
   // Create modal state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -178,7 +179,7 @@ export default function CardManager({ initialCards = [], initialCount = 0 }: Car
         </div>
       </div>
 
-      {error && (
+      {error ? (
         <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
           <p className="font-semibold">Error</p>
           <p>{error}</p>
@@ -191,125 +192,125 @@ export default function CardManager({ initialCards = [], initialCount = 0 }: Car
             Retry
           </Button>
         </div>
-      )}
-
-      <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-white/10 hover:bg-transparent">
-              <TableHead className="w-[32%] text-slate-300">Front</TableHead>
-              <TableHead className="w-[38%] text-slate-300">Back</TableHead>
-              <TableHead className="w-[10%] text-slate-300">Source</TableHead>
-              <TableHead className="w-[10%] text-slate-300">Due</TableHead>
-              <TableHead className="w-[10%] text-right text-slate-300">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow className="border-white/5">
-                <TableCell colSpan={5} className="h-32 text-center text-slate-400">
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="inline-block size-4 animate-spin rounded-full border-2 border-purple-400 border-t-transparent" />
-                    <span>Loading flashcards...</span>
-                  </div>
-                </TableCell>
+      ) : (
+        <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-white/10 hover:bg-transparent">
+                <TableHead className="w-[32%] text-slate-300">Front</TableHead>
+                <TableHead className="w-[38%] text-slate-300">Back</TableHead>
+                <TableHead className="w-[10%] text-slate-300">Source</TableHead>
+                <TableHead className="w-[10%] text-slate-300">Due</TableHead>
+                <TableHead className="w-[10%] text-right text-slate-300">Actions</TableHead>
               </TableRow>
-            ) : cards.length === 0 ? (
-              <TableRow className="border-white/5">
-                <TableCell colSpan={5} className="h-32 text-center text-slate-400">
-                  No flashcards found. Create one manually or generate via Dashboard!
-                </TableCell>
-              </TableRow>
-            ) : (
-              cards.map((card) => (
-                <TableRow key={card.id} className="border-white/5 transition-colors hover:bg-white/[0.03]">
-                  <TableCell className="max-w-[220px] truncate font-medium text-white">{card.front}</TableCell>
-                  <TableCell className="max-w-[280px] truncate text-slate-300">{card.back}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={card.source === "ai" ? "default" : "secondary"}
-                      className={cn(
-                        "text-xs capitalize",
-                        card.source === "ai"
-                          ? "border-purple-500/30 bg-purple-600/30 text-purple-200"
-                          : "border-blue-500/30 bg-blue-600/30 text-blue-200",
-                      )}
-                    >
-                      {card.source}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-xs text-slate-400">{formatDue(card.due)}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          handleOpenEdit(card);
-                        }}
-                        className="h-8 px-2 text-xs text-purple-300 hover:bg-white/10 hover:text-white"
-                        title="Edit Card"
-                      >
-                        <Edit2 className="mr-1 size-3.5" />
-                        <span>Edit</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setDeletingCard(card);
-                          setDeleteError(null);
-                        }}
-                        className="h-8 px-2 text-xs text-red-400 hover:bg-red-500/10 hover:text-red-300"
-                        title="Delete Card"
-                      >
-                        <Trash2 className="mr-1 size-3.5" />
-                        <span>Delete</span>
-                      </Button>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow className="border-white/5">
+                  <TableCell colSpan={5} className="h-32 text-center text-slate-400">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="inline-block size-4 animate-spin rounded-full border-2 border-purple-400 border-t-transparent" />
+                      <span>Loading flashcards...</span>
                     </div>
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : cards.length === 0 ? (
+                <TableRow className="border-white/5">
+                  <TableCell colSpan={5} className="h-32 text-center text-slate-400">
+                    No flashcards found. Create one manually or generate via Dashboard!
+                  </TableCell>
+                </TableRow>
+              ) : (
+                cards.map((card) => (
+                  <TableRow key={card.id} className="border-white/5 transition-colors hover:bg-white/[0.03]">
+                    <TableCell className="max-w-[220px] truncate font-medium text-white">{card.front}</TableCell>
+                    <TableCell className="max-w-[280px] truncate text-slate-300">{card.back}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={card.source === "ai" ? "default" : "secondary"}
+                        className={cn(
+                          "text-xs capitalize",
+                          card.source === "ai"
+                            ? "border-purple-500/30 bg-purple-600/30 text-purple-200"
+                            : "border-blue-500/30 bg-blue-600/30 text-blue-200",
+                        )}
+                      >
+                        {card.source}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-slate-400">{formatDue(card.due)}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            handleOpenEdit(card);
+                          }}
+                          className="h-8 px-2 text-xs text-purple-300 hover:bg-white/10 hover:text-white"
+                          title="Edit Card"
+                        >
+                          <Edit2 className="mr-1 size-3.5" />
+                          <span>Edit</span>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setDeletingCard(card);
+                            setDeleteError(null);
+                          }}
+                          className="h-8 px-2 text-xs text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                          title="Delete Card"
+                        >
+                          <Trash2 className="mr-1 size-3.5" />
+                          <span>Delete</span>
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
 
-        {/* Pagination controls */}
-        {!isLoading && count > 0 && (
-          <div className="flex items-center justify-between border-t border-white/10 px-4 py-3 text-sm text-slate-400">
-            <span>
-              Showing {Math.min((page - 1) * limit + 1, count)} to {Math.min(page * limit, count)} of {count} cards
-            </span>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page <= 1}
-                onClick={() => {
-                  setPage(page - 1);
-                }}
-                className="cursor-pointer border-white/10 bg-white/5 text-xs text-white hover:bg-white/15 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Previous
-              </Button>
-              <span className="px-2 text-xs text-slate-300">
-                Page {page} of {totalPages}
+          {/* Pagination controls */}
+          {!isLoading && count > 0 && (
+            <div className="flex items-center justify-between border-t border-white/10 px-4 py-3 text-sm text-slate-400">
+              <span>
+                Showing {Math.min((page - 1) * limit + 1, count)} to {Math.min(page * limit, count)} of {count} cards
               </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page >= totalPages}
-                onClick={() => {
-                  setPage(page + 1);
-                }}
-                className="cursor-pointer border-white/10 bg-white/5 text-xs text-white hover:bg-white/15 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Next
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => {
+                    setPage(page - 1);
+                  }}
+                  className="cursor-pointer border-white/10 bg-white/5 text-xs text-white hover:bg-white/15 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Previous
+                </Button>
+                <span className="px-2 text-xs text-slate-300">
+                  Page {page} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= totalPages}
+                  onClick={() => {
+                    setPage(page + 1);
+                  }}
+                  className="cursor-pointer border-white/10 bg-white/5 text-xs text-white hover:bg-white/15 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Create Card Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>

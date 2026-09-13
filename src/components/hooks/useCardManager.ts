@@ -30,11 +30,12 @@ export function useCardManager(
   initialCount = 0,
   initialPage = 1,
   limit = 10,
+  initialError: string | null = null,
 ): UseCardManagerResult {
   const [cards, setCards] = useState<Flashcard[]>(() => initialCards);
   const [count, setCount] = useState<number>(() => initialCount);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
   const [page, setPage] = useState<number>(initialPage);
 
   const fetchCards = useCallback(

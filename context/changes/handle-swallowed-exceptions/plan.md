@@ -47,6 +47,6 @@ Instead of failing silently, we will surface errors cleanly in the UI using exis
 
 ## Progress
 
-- [ ] Phase 1: Handle Cards Page Server Error
+- [x] Phase 1: Handle Cards Page Server Error
 - [ ] Phase 2: Surface Generator Cancel Exceptions
 - [ ] Phase 3: Synchronous Cleanup on Next Generation
