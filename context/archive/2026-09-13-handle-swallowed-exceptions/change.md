@@ -1,10 +1,10 @@
 ---
 change_id: handle-swallowed-exceptions
 title: Handle swallowed exceptions
-status: impl_reviewed
+status: archived
 created: 2026-09-13
 updated: 2026-09-13
-archived_at: null
+archived_at: 2026-09-13T19:39:29Z
 ---
 
 ## Notes
