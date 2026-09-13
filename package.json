@@ -1,5 +1,6 @@
 {
-  "name": "10x-astro-starter",
+  "name": "10x-cards",
+  "description": "AI-powered flashcard generator",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
