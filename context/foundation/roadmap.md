@@ -34,7 +34,7 @@ Manual flashcard creation is slow and happens when energy is lowest — after a 
 | S-02 | spaced-repetition-session | start a spaced repetition study session with scheduling | F-01 | FR-007 | done |
 | S-03 | card-management | manually create a flashcard and view, edit, delete saved flashcards | F-01 | FR-005, FR-006 | done |
 | S-04 | ux-improvements | experience progressive load timeouts, reset a review session, and cancel card generation (stopping stat + db writes) | F-01 | NFR (30 s generation) | done |
-| S-05 | scaffold-cleanup | remove 10x-astro-starter boilerplate and personalize landing page | F-01 | N/A | in-progress |
+| S-05 | scaffold-cleanup | remove 10x-astro-starter boilerplate and personalize landing page | F-01 | N/A | done |
 
 ## Baseline
 
@@ -123,7 +123,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Low risk. Purely cosmetic and config changes.
-- **Status:** in-progress
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -134,7 +134,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-02 | spaced-repetition-session | Spaced repetition study session with SR algorithm | done | Archived |
 | S-03 | card-management | Manual card creation and flashcard CRUD | done | Archived |
 | S-04 | ux-improvements | Progressive generation timeouts, session reset, cancel generation | done | Archived |
-| S-05 | scaffold-cleanup | Scaffold cleanup and personalization | planning | — |
+| S-05 | scaffold-cleanup | Scaffold cleanup and personalization | done | Implemented & reviewed |
 
 ## Open Roadmap Questions
 
