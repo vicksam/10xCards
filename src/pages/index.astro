@@ -1,6 +1,36 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+
+if (Astro.locals.user) {
+  return Astro.redirect("/dashboard");
+}
 ---
 
-<Layout>
+<Layout title="10xCards — AI-Powered Flashcards">
+  <main class="bg-cosmic flex min-h-screen flex-col items-center justify-center px-4 py-16 text-center sm:px-6 lg:px-8">
+    <div class="max-w-3xl space-y-6">
+      <h1
+        class="bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200 bg-clip-text text-5xl font-extrabold tracking-tight text-transparent sm:text-6xl"
+      >
+        10xCards
+      </h1>
+      <p class="mx-auto max-w-2xl text-lg text-blue-100/70 sm:text-xl">
+        AI-powered flashcard generator that turns pasted study notes into review-ready Q&A cards.
+      </p>
+      <div class="flex flex-col items-center justify-center gap-4 pt-4 sm:flex-row">
+        <a
+          href="/auth/signin"
+          class="w-full rounded-xl border border-white/20 bg-white/10 px-6 py-3 text-base font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20 sm:w-auto"
+        >
+          Sign In
+        </a>
+        <a
+          href="/auth/signup"
+          class="w-full rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-purple-500/25 transition-all hover:from-blue-600 hover:to-purple-700 sm:w-auto"
+        >
+          Sign Up
+        </a>
+      </div>
+    </div>
+  </main>
 </Layout>

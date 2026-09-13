@@ -66,5 +66,5 @@ We will execute this in three distinct phases: first cleaning up configs and unu
 ## Progress
 
 - [x] Phase 1: Configuration & Asset Cleanup — 2c6bd09
-- [x] Phase 2: Translation & SEO Setup
-- [ ] Phase 3: Landing Page Replacement
+- [x] Phase 2: Translation & SEO Setup — dd92ee6
+- [x] Phase 3: Landing Page Replacement
