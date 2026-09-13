@@ -129,12 +129,12 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 | Roadmap ID | Change ID | Suggested issue title | Ready for `/10x-plan` | Notes |
 |---|---|---|---|---|
-| F-01 | flashcard-schema | Set up Supabase migrations and flashcards table with RLS | done | — |
-| S-01 | ai-card-generation | AI flashcard generation from pasted text with candidate review | done | North star; plan reviewed, run `/10x-implement ai-card-generation phase 1` |
+| F-01 | flashcard-schema | Set up Supabase migrations and flashcards table with RLS | done | Archived |
+| S-01 | ai-card-generation | AI flashcard generation from pasted text with candidate review | done | Archived |
 | S-02 | spaced-repetition-session | Spaced repetition study session with SR algorithm | done | Archived |
 | S-03 | card-management | Manual card creation and flashcard CRUD | done | Archived |
 | S-04 | ux-improvements | Progressive generation timeouts, session reset, cancel generation | done | Archived |
-| S-05 | scaffold-cleanup | Scaffold cleanup and personalization | done | Implemented & reviewed |
+| S-05 | scaffold-cleanup | Scaffold cleanup and personalization | done | Archived |
 
 ## Open Roadmap Questions
 
