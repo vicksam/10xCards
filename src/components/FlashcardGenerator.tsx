@@ -12,17 +12,32 @@ interface FlashcardGeneratorProps {
 
 export default function FlashcardGenerator({ isConfigured = true }: FlashcardGeneratorProps) {
   const [text, setText] = useState("");
+  const [cancelSuccessMessage, setCancelSuccessMessage] = useState<string | null>(null);
+  const [lastCancelledGenId, setLastCancelledGenId] = useState<string | undefined>(undefined);
   const { state, generate, reset, cancel } = useFlashcardGeneration();
 
   const handleReset = () => {
     setText("");
+    setCancelSuccessMessage(null);
     reset();
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     const generationId = state.status === "success" ? (state.generationId ?? undefined) : undefined;
-    void cancel(generationId);
+    setLastCancelledGenId(generationId);
+    setCancelSuccessMessage(null);
     setText("");
+    const success = await cancel(generationId);
+    if (success && generationId) {
+      setCancelSuccessMessage("Cancelled cleanly. Ready for your next study session.");
+    }
+  };
+
+  const handleRetryCancel = async () => {
+    const success = await cancel(lastCancelledGenId);
+    if (success) {
+      setCancelSuccessMessage("Cancelled cleanly. Ready for your next study session.");
+    }
   };
 
   const trimmedLength = text.trim().length;
@@ -77,6 +92,7 @@ export default function FlashcardGenerator({ isConfigured = true }: FlashcardGen
                 value={text}
                 onChange={(e) => {
                   setText(e.target.value);
+                  if (cancelSuccessMessage) setCancelSuccessMessage(null);
                 }}
                 placeholder="Paste your study text here (articles, notes, documentation)..."
                 maxLength={10000}
@@ -110,12 +126,21 @@ export default function FlashcardGenerator({ isConfigured = true }: FlashcardGen
               </div>
             )}
 
+            {cancelSuccessMessage && state.status === "idle" && (
+              <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-200">
+                <CheckCircle2 className="size-5 shrink-0 text-emerald-400" />
+                <span>{cancelSuccessMessage}</span>
+              </div>
+            )}
+
             {state.status === "error" && (
               <div className="border-destructive/30 bg-destructive/10 text-destructive-foreground flex flex-col gap-3 rounded-xl border p-4 text-sm">
                 <div className="flex items-start gap-2.5">
                   <AlertTriangle className="text-destructive mt-0.5 size-4 shrink-0" />
                   <div className="flex-1">
-                    <p className="font-semibold text-white">Generation failed</p>
+                    <p className="font-semibold text-white">
+                      {state.message.includes("cancel") ? "Cancellation failed" : "Generation failed"}
+                    </p>
                     <p className="mt-0.5 text-white/80">{state.message}</p>
                   </div>
                 </div>
@@ -124,11 +149,11 @@ export default function FlashcardGenerator({ isConfigured = true }: FlashcardGen
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => generate(text)}
+                    onClick={state.message.includes("cancel") ? handleRetryCancel : () => generate(text)}
                     className="border-destructive/30 bg-destructive/20 hover:bg-destructive/30 text-white"
                   >
                     <RotateCcw className="size-3.5" />
-                    Try again (up to 60s)
+                    {state.message.includes("cancel") ? "Try again" : "Try again (up to 60s)"}
                   </Button>
                 </div>
               </div>

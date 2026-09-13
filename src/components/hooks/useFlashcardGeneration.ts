@@ -35,7 +35,7 @@ export function useFlashcardGeneration() {
     setLastAttemptTimeout(null);
   }, []);
 
-  const cancel = useCallback(async (generationId?: string) => {
+  const cancel = useCallback(async (generationId?: string): Promise<boolean> => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort("CANCEL");
     }
@@ -47,10 +47,17 @@ export function useFlashcardGeneration() {
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error("[useFlashcardGeneration] Error deleting unfinalized generation:", err);
+        setState({
+          status: "error",
+          message: "Failed to cancel cleanly. Please check your connection and try again.",
+        });
+        setLastAttemptTimeout(null);
+        return false;
       }
     }
     setState({ status: "idle" });
     setLastAttemptTimeout(null);
+    return true;
   }, []);
 
   const generate = useCallback(

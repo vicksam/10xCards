@@ -419,5 +419,36 @@ describe("useFlashcardGeneration — timeout tier state machine", () => {
 
       expect(result.current.state.status).toBe("idle");
     });
+
+    it('transitions to "idle" when cancel(generationId) succeeds', async () => {
+      global.fetch = vi.fn().mockResolvedValueOnce(new Response(null, { status: 204 }));
+      const { result } = renderHook(() => useFlashcardGeneration());
+
+      await act(async () => {
+        await result.current.cancel("gen-123");
+      });
+
+      expect(global.fetch).toHaveBeenCalledWith("/api/flashcards/generation/gen-123", {
+        method: "DELETE",
+      });
+      expect(result.current.state.status).toBe("idle");
+    });
+
+    it('transitions to "error" when cancel(generationId) delete request fails', async () => {
+      global.fetch = vi.fn().mockRejectedValueOnce(new Error("Network error"));
+      const { result } = renderHook(() => useFlashcardGeneration());
+
+      await act(async () => {
+        await result.current.cancel("gen-123");
+      });
+
+      expect(result.current.state.status).toBe("error");
+      if (result.current.state.status === "error") {
+        expect(result.current.state.message).toBe(
+          "Failed to cancel cleanly. Please check your connection and try again.",
+        );
+      }
+      expect(result.current.lastAttemptTimeout).toBeNull();
+    });
   });
 });
