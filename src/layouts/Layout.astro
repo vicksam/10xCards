@@ -6,9 +6,10 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   title?: string;
+  description?: string;
 }
 
-const { title = "10xCards" } = Astro.props;
+const { title = "10xCards", description = "AI-powered flashcard generator" } = Astro.props;
 const { user } = Astro.locals;
 const pathname = Astro.url.pathname;
 ---
@@ -20,17 +21,18 @@ const pathname = Astro.url.pathname;
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <title>{title}</title>
+    <meta name="description" content={description} />
   </head>
   <body>
     {
       missingConfigs.map((cfg) => (
         <Banner variant="error">
-          <strong>Uwaga:</strong> {cfg.message}
+          <strong>Warning:</strong> {cfg.message}
           {cfg.docsUrl && (
             <>
               {" "}
               <a href={cfg.docsUrl} target="_blank" rel="noopener noreferrer">
-                {cfg.docsLabel ?? "Dokumentacja"}
+                {cfg.docsLabel ?? "Documentation"}
               </a>
               .
             </>
