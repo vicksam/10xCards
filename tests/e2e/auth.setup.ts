@@ -34,7 +34,16 @@ setup("authenticate", async ({ page }) => {
     await signInButton.click();
   }
 
-  await page.waitForURL("/dashboard", { timeout: 15000 });
+  await page.waitForURL((url) => url.pathname === "/dashboard" || url.searchParams.has("error"), {
+    timeout: 15000,
+  });
+
+  const currentUrl = new URL(page.url());
+  const errorParam = currentUrl.searchParams.get("error");
+  if (errorParam) {
+    throw new Error(`Sign in failed with error: "${errorParam}" (URL: ${page.url()})`);
+  }
+
   await expect(page.getByRole("heading", { name: /generate flashcards with ai/i })).toBeVisible();
 
   await page.context().storageState({ path: authFile });
