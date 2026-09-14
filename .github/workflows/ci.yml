@@ -32,3 +32,4 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY || 'test-mock-key' }}
