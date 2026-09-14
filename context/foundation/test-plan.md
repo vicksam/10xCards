@@ -71,13 +71,13 @@ Each row is a discrete rollout phase that will open its own change folder
 via `/10x-new`. Status moves left-to-right through the values below; the
 orchestrator updates Status as artifacts appear on disk.
 
-| #   | Phase name                                 | Goal (one line)                                                                                           | Risks covered | Test types                                              | Status      | Change folder                   |
-| --- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------- | ----------- | ------------------------------- |
-| 1   | Bootstrap + critical-path unit             | Install vitest and cover LLM parsing and retry state machine — highest signal at zero infrastructure cost | R1, R4        | unit                                                    | complete    | testing-bootstrap-critical-path |
+| #   | Phase name                                 | Goal (one line)                                                                                           | Risks covered | Test types                                              | Status      | Change folder                          |
+| --- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------- | ----------- | -------------------------------------- |
+| 1   | Bootstrap + critical-path unit             | Install vitest and cover LLM parsing and retry state machine — highest signal at zero infrastructure cost | R1, R4        | unit                                                    | complete    | testing-bootstrap-critical-path        |
 | 2   | e2e — critical path finalization           | Cover finalization failure surfacing with full-stack confidence                                           | R2            | e2e (Playwright)                                        | complete    | testing-e2e-critical-path-finalization |
-| 3   | Integration — data integrity & error paths | Cover orphaned-row KPI impact and text leakage on error paths                                             | R3, R7        | integration (mocked Supabase + API)                     | complete    | testing-integration-data-integrity |
-| 4   | Integration — ownership & auth boundaries  | Cover IDOR on generation review and auth-expiry surfacing during study                                    | R5, R6        | integration (two test users, simulated expired session) | change opened | testing-integration-ownership-auth |
-| 5   | Quality-gates wiring                       | Add `npm test` script; lock vitest + lint + typecheck in CI                                               | — (floor)     | gate config                                             | not started | —                               |
+| 3   | Integration — data integrity & error paths | Cover orphaned-row KPI impact and text leakage on error paths                                             | R3, R7        | integration (mocked Supabase + API)                     | complete    | testing-integration-data-integrity     |
+| 4   | Integration — ownership & auth boundaries  | Cover IDOR on generation review and auth-expiry surfacing during study                                    | R5, R6        | integration (two test users, simulated expired session) | complete    | testing-integration-ownership-auth     |
+| 5   | Quality-gates wiring                       | Add `npm test` script; lock vitest + lint + typecheck in CI                                               | — (floor)     | gate config                                             | not started | —                                      |
 
 **Status vocabulary** (fixed — parser literals):
 
@@ -164,17 +164,21 @@ e.g. `src/lib/services/foo.ts` → `test/lib/services/foo.test.ts`
 **File location**: `tests/e2e/` (e.g. `tests/e2e/seed.spec.ts`).
 
 **Runner**: Playwright (`@playwright/test`) configured in `playwright.config.ts`.
+
 - Command to run: `npx playwright test tests/e2e/<spec>.spec.ts`
 
 **Auth & Session pattern:**
+
 - Authenticated state is managed via `tests/e2e/auth.setup.ts` producing `playwright/.auth/user.json`.
 - The `chromium` project in `playwright.config.ts` depends on `setup` and injects `storageState: "playwright/.auth/user.json"`.
 
 **Mocking boundaries vs Real boundaries:**
+
 - Real: Authentication cookies, SSR page loading, React island hydration, client routing, DOM state transitions.
 - Mocked via `page.route()`: External LLM generation endpoints (`POST **/api/flashcards/generate`) to ensure zero token cost and fast deterministic runs; and backend RPC failure simulation (`POST **/api/flashcards`) to verify error recovery without corrupting live DB state.
 
 **Locators & Waiting discipline:**
+
 - Accessibility tree first: `getByRole`, `getByPlaceholder`, `getByText`.
 - Wait for state, never for time: `expect(...).toBeVisible()`, `page.waitForResponse(...)`. Strictly no `page.waitForTimeout()`.
 
@@ -193,7 +197,26 @@ e.g. `src/lib/services/foo.ts` → `test/lib/services/foo.test.ts`
 
 ### 6.4 Adding a test for a cross-user ownership boundary
 
-TBD — see §3 Phase 4 for the IDOR / security-definer RPC integration test pattern.
+**File location**: `test/integration/` (e.g. `test/integration/ownership-boundary.test.ts`, `test/integration/auth-expiry.test.ts`).
+
+**Environment**:
+
+- API route & database query boundary tests: default `node` pool.
+- React hook & component auth expiry tests: `// @vitest-environment jsdom` as first line of the file.
+
+**Mock patterns established in Phase 4:**
+
+- **IDOR / Ownership filtering at database edge**:
+  - Mock `APIContext` with caller User B (`context.locals.user = { id: userBId }`).
+  - Intercept outbound PostgREST requests by mocking `globalThis.fetch`.
+  - Assert that outbound queries append ownership filters (e.g. `user_id=eq.${userBId}`) so attempts to access User A's ID filter down to zero rows at the database edge.
+  - Assert early rejection (HTTP 401 Unauthorized or HTTP 400 Bad Request) without touching `globalThis.fetch` when requests lack authentication or pass invalid UUID formats.
+- **Security-definer RPC boundary validation**:
+  - For endpoints dispatching to security-definer Postgres functions (e.g., `finalize_generation_review`), verify that `supabase.rpc(fn, params)` receives explicit identifiers (`generation_id`, candidate cards) and that error responses from unauthorized or missing reviews (Postgres error `P0001`) correctly map to HTTP 500 without leaking sensitive state.
+- **Auth expiry handling during active sessions**:
+  - Mock `fetch` returning `401 Unauthorized` responses mid-session (e.g. `/api/study/review`).
+  - Verify that the study session hook sets `isAuthExpired: true` alongside `submitError` without discarding in-progress cards or resetting index.
+  - Verify that the UI displays an inline "Session Expired" notification with an external link (`/auth/signin`, `target="_blank"`) preserving card state, and clears the alert on successful retry after re-authenticating.
 
 ### 6.5 Adding a quality gate to CI
 

@@ -7,6 +7,7 @@ We are implementing Phase 4 of the test rollout (`testing-integration-ownership-
 ## Current State Analysis
 
 Based on the research and codebase analysis:
+
 - **R6 (IDOR on Generation Review):** The backend is already secure. The `finalize_generation_review` RPC explicitly checks ownership during the lock/retrieve process using the caller's `auth.uid()`. The DELETE endpoint explicitly filters by `user_id`. The application routes the calls correctly.
 - **R5 (Auth Expiry During Study Session):** When the session cookie expires, the `/api/study/review` route returns a `401 Unauthorized`. However, `useStudySession.ts` parses this error and generically sets `submitError = "Unauthorized"`. The UI component `StudySession.tsx` renders this string blindly in an error box without providing a recovery path.
 
@@ -28,8 +29,8 @@ Based on the research and codebase analysis:
 - [x] 1.2 Update `StudySession.tsx` to render an inline "Session Expired" error state with a "Sign in" button that opens `/auth/signin` in a new tab when `isAuthExpired` is true. — 95ecf33
 - [x] 2.1 Create `test/integration/auth-expiry.test.ts` and set up the `jsdom` environment. — 189f845
 - [x] 2.2 Write a test that mounts the `StudySession` component (or uses `renderHook` on `useStudySession`), mocks the `fetch` to return a 401, and asserts that the specific auth expiry error UI is shown. — 189f845
-- [x] 3.1 Create `test/integration/ownership-boundary.test.ts` using the API routing and mocking patterns from Phase 3.
-- [x] 3.2 Write a test for the `DELETE` generation endpoint to verify that `.eq("user_id", context.locals.user.id)` is appended to the Supabase fetch call.
-- [x] 3.3 Write a test for the `POST` (finalize) endpoint to verify that `supabase.rpc("finalize_generation_review", { generation_id })` is called with the correct generation ID.
-- [ ] 4.1 Update `context/foundation/test-plan.md` Section 6.4 with the cookbook pattern for IDOR / cross-user ownership boundary integration tests.
-- [ ] 4.2 Update `context/foundation/test-plan.md` Section 3 to change Phase 4 status to `complete`.
+- [x] 3.1 Create `test/integration/ownership-boundary.test.ts` using the API routing and mocking patterns from Phase 3. — 33f7f79
+- [x] 3.2 Write a test for the `DELETE` generation endpoint to verify that `.eq("user_id", context.locals.user.id)` is appended to the Supabase fetch call. — 33f7f79
+- [x] 3.3 Write a test for the `POST` (finalize) endpoint to verify that `supabase.rpc("finalize_generation_review", { generation_id })` is called with the correct generation ID. — 33f7f79
+- [x] 4.1 Update `context/foundation/test-plan.md` Section 6.4 with the cookbook pattern for IDOR / cross-user ownership boundary integration tests.
+- [x] 4.2 Update `context/foundation/test-plan.md` Section 3 to change Phase 4 status to `complete`.
