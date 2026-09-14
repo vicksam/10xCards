@@ -27,6 +27,7 @@ test.describe("Flashcard finalization failure recovery (Risk R2)", () => {
       password,
     });
     expect(authError).toBeNull();
+    if (!authData.user) throw new Error("Auth user missing");
     const userId = authData.user.id;
 
     // Unique card content to avoid collisions and track lifecycle
@@ -44,6 +45,7 @@ test.describe("Flashcard finalization failure recovery (Risk R2)", () => {
       .select("id")
       .single();
     expect(genError).toBeNull();
+    if (!genReview) throw new Error("Generation review row creation failed");
     const generationId = genReview.id;
 
     try {
