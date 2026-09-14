@@ -1,10 +1,10 @@
 ---
 change_id: testing-integration-data-integrity
 title: Testing integration data integrity
-status: implemented
+status: archived
 created: 2026-09-12
 updated: 2026-09-14
-archived_at: null
+archived_at: 2026-09-14T19:43:40Z
 ---
 
 ## Notes
