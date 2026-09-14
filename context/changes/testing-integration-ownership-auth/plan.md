@@ -24,8 +24,8 @@ Based on the research and codebase analysis:
 
 ## Progress
 
-- [ ] 1.1 Update `useStudySession.ts` to detect 401 errors and set a specific `isAuthExpired` state alongside `submitError`.
-- [ ] 1.2 Update `StudySession.tsx` to render an inline "Session Expired" error state with a "Sign in" button that opens `/auth/signin` in a new tab when `isAuthExpired` is true.
+- [x] 1.1 Update `useStudySession.ts` to detect 401 errors and set a specific `isAuthExpired` state alongside `submitError`.
+- [x] 1.2 Update `StudySession.tsx` to render an inline "Session Expired" error state with a "Sign in" button that opens `/auth/signin` in a new tab when `isAuthExpired` is true.
 - [ ] 2.1 Create `test/integration/auth-expiry.test.ts` and set up the `jsdom` environment.
 - [ ] 2.2 Write a test that mounts the `StudySession` component (or uses `renderHook` on `useStudySession`), mocks the `fetch` to return a 401, and asserts that the specific auth expiry error UI is shown.
 - [ ] 3.1 Create `test/integration/ownership-boundary.test.ts` using the API routing and mocking patterns from Phase 3.

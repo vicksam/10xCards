@@ -46,6 +46,7 @@ export function useStudySession(initialCards: Flashcard[]) {
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isAuthExpired, setIsAuthExpired] = useState<boolean>(false);
   const [sessionDone, setSessionDone] = useState<boolean>(false);
 
   const totalCount = initialCards.length;
@@ -64,6 +65,7 @@ export function useStudySession(initialCards: Flashcard[]) {
 
       setIsSubmitting(true);
       setSubmitError(null);
+      setIsAuthExpired(false);
 
       const payload: ReviewRequest = {
         flashcard_id: current.id,
@@ -88,6 +90,9 @@ export function useStudySession(initialCards: Flashcard[]) {
             setSessionDone(true);
           }
         } else {
+          if (response.status === 401) {
+            setIsAuthExpired(true);
+          }
           let errorMessage = `Failed to record review (status ${response.status})`;
           try {
             const body = (await response.json()) as { error?: string };
@@ -114,6 +119,7 @@ export function useStudySession(initialCards: Flashcard[]) {
     isFlipped,
     isSubmitting,
     submitError,
+    isAuthExpired,
     sessionDone,
     totalCount,
     remainingCount,

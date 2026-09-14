@@ -1,7 +1,7 @@
 ---
 change_id: testing-integration-ownership-auth
 title: Integration tests for ownership and auth boundaries
-status: planned
+status: implementing
 created: 2026-09-14
 updated: 2026-09-14
 archived_at: null

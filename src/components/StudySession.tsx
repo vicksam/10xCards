@@ -25,6 +25,7 @@ export default function StudySession({ cards: initialCards }: StudySessionProps)
     isFlipped,
     isSubmitting,
     submitError,
+    isAuthExpired,
     sessionDone,
     totalCount,
     remainingCount,
@@ -193,11 +194,30 @@ export default function StudySession({ cards: initialCards }: StudySessionProps)
       )}
 
       {/* Error feedback */}
-      {submitError && (
+      {isAuthExpired ? (
+        <div className="flex flex-col items-center justify-between gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-center sm:flex-row sm:text-left">
+          <div>
+            <p className="font-semibold text-amber-200">Session Expired</p>
+            <p className="text-xs text-amber-200/80">
+              Your session has expired. Sign in in a new tab, then try rating again to save your progress.
+            </p>
+          </div>
+          <Button
+            asChild
+            size="sm"
+            variant="outline"
+            className="shrink-0 border-amber-500/30 bg-black/40 text-amber-200 hover:bg-amber-500/20 hover:text-white"
+          >
+            <a href="/auth/signin" target="_blank" rel="noopener noreferrer">
+              Sign in
+            </a>
+          </Button>
+        </div>
+      ) : submitError ? (
         <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-center text-sm text-rose-200">
           {submitError}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
