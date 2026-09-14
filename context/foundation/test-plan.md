@@ -77,7 +77,7 @@ orchestrator updates Status as artifacts appear on disk.
 | 2   | e2e — critical path finalization           | Cover finalization failure surfacing with full-stack confidence                                           | R2            | e2e (Playwright)                                        | complete      | testing-e2e-critical-path-finalization |
 | 3   | Integration — data integrity & error paths | Cover orphaned-row KPI impact and text leakage on error paths                                             | R3, R7        | integration (mocked Supabase + API)                     | complete      | testing-integration-data-integrity     |
 | 4   | Integration — ownership & auth boundaries  | Cover IDOR on generation review and auth-expiry surfacing during study                                    | R5, R6        | integration (two test users, simulated expired session) | complete      | testing-integration-ownership-auth     |
-| 5   | Quality-gates wiring                       | Add `npm test` script; lock vitest + lint + typecheck in CI                                               | — (floor)     | gate config                                             | change opened | testing-quality-gates-wiring           |
+| 5   | Quality-gates wiring                       | Add `npm test` script; lock vitest + lint + typecheck in CI                                               | — (floor)     | gate config                                             | complete      | testing-quality-gates-wiring           |
 
 **Status vocabulary** (fixed — parser literals):
 
@@ -220,7 +220,14 @@ e.g. `src/lib/services/foo.ts` → `test/lib/services/foo.test.ts`
 
 ### 6.5 Adding a quality gate to CI
 
-TBD — see §3 Phase 5 for the `npm test` script and CI wiring pattern.
+**Workflow location**: `.github/workflows/ci.yml`.
+
+**Gate execution sequence**:
+1. `npm run lint` — ESLint static analysis.
+2. `npm run typecheck` — `tsc --noEmit` TypeScript typechecking.
+3. `npm run test` — Vitest unit & integration test execution (isolated without Supabase secrets to enforce mocking).
+4. `npm run build` — Astro build gated by passing tests (with repository `SUPABASE_URL` and `SUPABASE_KEY` secrets).
+5. `npx playwright install --with-deps` & `npx playwright test` — Playwright browser tests (with repository secrets).
 
 ### 6.6 Per-rollout-phase notes
 
