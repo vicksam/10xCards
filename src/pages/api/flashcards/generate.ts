@@ -100,10 +100,7 @@ export const POST: APIRoute = async (context) => {
     }
 
     // eslint-disable-next-line no-console
-    console.error("[api/generate] Error in generation:", error);
-    return Response.json(
-      { error: error instanceof Error ? error.message : "Failed to generate flashcards" },
-      { status: 500 },
-    );
+    console.error("[api/generate] Error in generation:", error instanceof Error ? error.name : "Unknown error");
+    return Response.json({ error: "Internal server error during generation" }, { status: 500 });
   }
 };

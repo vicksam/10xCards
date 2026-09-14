@@ -1,6 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import type { AstroCookies } from "astro";
+import type { APIContext, AstroCookies } from "astro";
 import { createClient } from "@/lib/supabase";
+
+const { mockGenerateFlashcards } = vi.hoisted(() => ({
+  mockGenerateFlashcards: vi.fn(),
+}));
+
+vi.mock("@/lib/services/ai-generation", () => ({
+  generateFlashcards: mockGenerateFlashcards,
+}));
+
+import { POST } from "@/pages/api/flashcards/generate";
 
 export function createMockCookies(): AstroCookies {
   return {
@@ -98,5 +108,57 @@ describe("R3: KPI Orphaned Row Test", () => {
     expect(urlString).toContain("/rest/v1/generation_reviews");
     expect(urlString).toContain("finalized_at=not.is.null");
     expect(urlString).toContain(`user_id=eq.${userId}`);
+  });
+});
+
+describe("R7: Text Leakage Error Path Test", () => {
+  function createMockContext(body: unknown, userId = "test-user-123"): APIContext {
+    return {
+      locals: {
+        user: userId ? ({ id: userId } as NonNullable<App.Locals["user"]>) : null,
+      },
+      request: new Request("http://localhost/api/flashcards/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }),
+      cookies: createMockCookies(),
+    } as unknown as APIContext;
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("does not leak sensitive study text into error response or console.error on AI failure", async () => {
+    const sensitiveStudyText = "SUPER_SECRET_PATIENT_MEDICAL_HISTORY_DATA_98765";
+    const sensitiveError = new Error(
+      `OpenAI upstream failure while processing payload containing: ${sensitiveStudyText}`,
+    );
+
+    mockGenerateFlashcards.mockRejectedValueOnce(sensitiveError);
+
+    const consoleErrorSpy = vi.spyOn(console, "error").mockReturnValue();
+
+    const context = createMockContext({ text: sensitiveStudyText });
+    const response = await POST(context);
+
+    expect(response.status).toBe(500);
+
+    const body = (await response.json()) as { error?: string };
+
+    // Assert response body does not contain sensitive text and returns generic error
+    expect(JSON.stringify(body)).not.toContain(sensitiveStudyText);
+    expect(body.error).toBe("Internal server error during generation");
+
+    // Assert console.error calls do not contain sensitive text
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    for (const call of consoleErrorSpy.mock.calls) {
+      for (const arg of call) {
+        const text =
+          typeof arg === "string" ? arg : arg instanceof Error ? `${arg.name}: ${arg.message}` : JSON.stringify(arg);
+        expect(text).not.toContain(sensitiveStudyText);
+      }
+    }
   });
 });
