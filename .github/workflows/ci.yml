@@ -9,6 +9,7 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    environment: "10xCards CI"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
