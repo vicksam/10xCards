@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-09-11
+> Last updated: 2026-09-14
 
 ---
 
@@ -75,7 +75,7 @@ orchestrator updates Status as artifacts appear on disk.
 | --- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------- | ----------- | ------------------------------- |
 | 1   | Bootstrap + critical-path unit             | Install vitest and cover LLM parsing and retry state machine — highest signal at zero infrastructure cost | R1, R4        | unit                                                    | complete    | testing-bootstrap-critical-path |
 | 2   | e2e — critical path finalization           | Cover finalization failure surfacing with full-stack confidence                                           | R2            | e2e (Playwright)                                        | complete    | testing-e2e-critical-path-finalization |
-| 3   | Integration — data integrity & error paths | Cover orphaned-row KPI impact and text leakage on error paths                                             | R3, R7        | integration (mocked Supabase + API)                     | implementing| testing-integration-data-integrity |
+| 3   | Integration — data integrity & error paths | Cover orphaned-row KPI impact and text leakage on error paths                                             | R3, R7        | integration (mocked Supabase + API)                     | complete    | testing-integration-data-integrity |
 | 4   | Integration — ownership & auth boundaries  | Cover IDOR on generation review and auth-expiry surfacing during study                                    | R5, R6        | integration (two test users, simulated expired session) | not started | —                               |
 | 5   | Quality-gates wiring                       | Add `npm test` script; lock vitest + lint + typecheck in CI                                               | — (floor)     | gate config                                             | not started | —                               |
 
@@ -180,7 +180,16 @@ e.g. `src/lib/services/foo.ts` → `test/lib/services/foo.test.ts`
 
 ### 6.3 Adding an integration test (API route or hook + mocked network)
 
-TBD — see §3 Phase 3 for the KPI exclusion and error path integration test patterns.
+**File location**: `test/integration/` (e.g. `test/integration/data-integrity.test.ts`).
+
+**Environment**: default `node` pool.
+
+**Mock patterns established in Phase 3:**
+
+- `createClient`: instantiate with mock headers and cookies (`createMockCookies()`).
+- Supabase fetch mocking: intercept database queries via `globalThis.fetch = vi.fn().mockResolvedValue(createMockJsonResponse(...))`. Assert URL contains PostgREST filters (e.g. `finalized_at=not.is.null`) to verify filtering at the database edge.
+- API route testing: invoke exported HTTP handlers (e.g., `POST(context)`) with a mocked `APIContext` (constructed `Request`, `locals.user`, and `cookies`).
+- Text leakage / privacy assertions: spy on `console.error` with `.mockReturnValue()`, simulate upstream errors with known sentinel text, and assert that neither the HTTP response body (`JSON.stringify(body)`) nor any arguments passed to `console.error` contain the sensitive string.
 
 ### 6.4 Adding a test for a cross-user ownership boundary
 
