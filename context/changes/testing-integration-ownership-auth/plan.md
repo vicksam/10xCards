@@ -32,5 +32,5 @@ Based on the research and codebase analysis:
 - [x] 3.1 Create `test/integration/ownership-boundary.test.ts` using the API routing and mocking patterns from Phase 3. — 33f7f79
 - [x] 3.2 Write a test for the `DELETE` generation endpoint to verify that `.eq("user_id", context.locals.user.id)` is appended to the Supabase fetch call. — 33f7f79
 - [x] 3.3 Write a test for the `POST` (finalize) endpoint to verify that `supabase.rpc("finalize_generation_review", { generation_id })` is called with the correct generation ID. — 33f7f79
-- [x] 4.1 Update `context/foundation/test-plan.md` Section 6.4 with the cookbook pattern for IDOR / cross-user ownership boundary integration tests.
-- [x] 4.2 Update `context/foundation/test-plan.md` Section 3 to change Phase 4 status to `complete`.
+- [x] 4.1 Update `context/foundation/test-plan.md` Section 6.4 with the cookbook pattern for IDOR / cross-user ownership boundary integration tests. — 4ae20c3
+- [x] 4.2 Update `context/foundation/test-plan.md` Section 3 to change Phase 4 status to `complete`. — 4ae20c3
