@@ -18,7 +18,14 @@ jobs:
       - run: npm ci
       - run: npx astro sync
       - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test
       - run: npm run build
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      - run: npx playwright install --with-deps
+      - run: npx playwright test
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}

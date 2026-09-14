@@ -46,7 +46,7 @@ test.describe("Flashcard finalization failure recovery (Risk R2)", () => {
       .single();
     expect(genError).toBeNull();
     if (!genReview) throw new Error("Generation review row creation failed");
-    const generationId = genReview.id;
+    const generationId = String(genReview.id);
 
     try {
       // 1. Mock generation response so the test is deterministic, fast, and does not burn LLM credits

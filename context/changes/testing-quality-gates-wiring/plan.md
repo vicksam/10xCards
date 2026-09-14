@@ -85,5 +85,5 @@ Running Playwright and building the project will increase the CI run time. The s
 
 #### Automated
 
-- [ ] 1.1 CI pipeline definition is valid yaml.
-- [ ] 1.2 Linting passes: `npm run lint`
+- [x] 1.1 CI pipeline definition is valid yaml.
+- [x] 1.2 Linting passes: `npm run lint`
