@@ -38,6 +38,6 @@ Implement Phase 3 of the test rollout to cover data integrity (R3) and error pat
 
 ## Progress
 
-- [x] 1. Setup and Mock Utilities
-- [ ] 2. R3: KPI Orphaned Row Test
+- [x] 1. Setup and Mock Utilities — c63a2b5
+- [x] 2. R3: KPI Orphaned Row Test
 - [ ] 3. R7: Text Leakage Error Path Test
